@@ -28,35 +28,94 @@ app.get("/", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, result) => {
+  db.query("SELECT * FROM users ORDER BY id DESC", (err, result) => {
     if (err) {
-      console.log(err);
-      res.status(500).json(err);
-    } else {
-      res.json(result);
+      console.error(err);
+      return res.status(500).json({ message: "Failed to fetch users" });
     }
+    res.json(result);
+  });
+});
+
+app.get("/users/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.query("SELECT * FROM users WHERE id = ?", [id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Failed to fetch user" });
+    }
+    if (!result || result.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(result[0]);
   });
 });
 
 app.post("/users", (req, res) => {
-  console.log(req.body);
-
   const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ message: "name and email are required" });
+  }
 
   db.query(
     "INSERT INTO users (name, email) VALUES (?, ?)",
     [name, email],
     (err, result) => {
       if (err) {
-        console.log(err);
-        res.status(500).json(err);
-      } else {
-        res.json({
-          message: "User Added Successfully",
-        });
+        console.error(err);
+        return res.status(500).json({ message: "Failed to create user" });
       }
+      res.status(201).json({
+        message: "User Added Successfully",
+        id: result.insertId,
+      });
     }
   );
+});
+
+app.put("/users/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ message: "name and email are required" });
+  }
+
+  db.query(
+    "UPDATE users SET name = ?, email = ? WHERE id = ?",
+    [name, email, id],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Failed to update user" });
+      }
+
+      if (!result || result.affectedRows === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ message: "User Updated Successfully" });
+    }
+  );
+});
+
+app.delete("/users/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.query("DELETE FROM users WHERE id = ?", [id], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Failed to delete user" });
+    }
+
+    if (!result || result.affectedRows === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "User Deleted Successfully" });
+  });
 });
 
 app.listen(process.env.PORT, () => {
