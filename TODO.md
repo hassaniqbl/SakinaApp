@@ -1,29 +1,19 @@
-# TODO - User Module Full-Stack CRUD
+# TODO - Patient Register (PATIENT_PROFILE)
 
-- [x] Backend: Update `server/index.js` with REST endpoints
-  - [x] GET /users
-  - [x] GET /users/:id
-  - [x] POST /users
-  - [x] PUT /users/:id
-  - [x] DELETE /users/:id
-  - [x] Proper error handling + consistent JSON responses
+- [x] Add PATIENT_PROFILE table creation SQL to `server/db_setup.sql`.
+
+- [x] Add backend endpoints in `server/index.js` for registering patients:
+  - [x] `POST /patients` (insert into PATIENT_PROFILE)
 
 
-- [x] Backend: Add `server/db_setup.sql` to create database `SAKINACARE` and table `users`
+
+- [x] Replace `client/src/App.jsx` with a Patient Register page that contains a form for all `PATIENT_PROFILE` fields.
 
 
-- [x] Frontend: Update `client/src/App.jsx`
-  - [x] Replace list-only UI with form + responsive table
-  - [x] Implement Add / Edit (prefill) / Update (PUT) / Delete (DELETE)
-  - [x] Use Axios to call backend
-  - [x] Add success/error messages and auto-refresh after CRUD
+- [ ] Update `client/src/App.css` only if needed for layout/inputs.
 
 
-- [x] Frontend: Update `client/src/App.css` for clean UI styling (responsive)
-
-
-- [x] Test end-to-end
-  - [x] Start backend on port 5000
-  - [x] Start frontend (Vite)
-  - [ ] Verify all CRUD flows and error states
+- [ ] Test end-to-end:
+  - [ ] Start backend and frontend
+  - [ ] Submit form and verify record insertion in MySQL
 

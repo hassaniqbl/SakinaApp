@@ -1,0 +1,150 @@
+Six Weeks Postnatal Follow-up ID,
+Six Weeks Postnatal Follow-up ID,Single line of text
+Delivery Record ID,Lookup
+Patient Status,Choice
+Patient Health,Choice
+Baby Status,Choice
+Baby Health,Choice
+Breast Feeding Duration,Choice
+Patient Health More Details,Multiple lines of text
+Death Reason,Single line of text
+Baby Health More Details,Multiple lines of text
+Reason,Multiple lines of text
+Baby Cord Condition,Choice
+Baby Cord Condition More Details,Multiple lines of text
+Follow-up Date,Date and Time
+Created By Latitude,Number
+Created By Longitude,Number
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
+,
+Anemia Checkup ,
+Anemia Checkup ID,Single line of text
+Patient Registration Number,Lookup
+Haemoglobin Count,Number
+Any Other Symptoms,Multiple lines of text
+Created By Latitude,Number
+Created By Longitude,Number
+Patient Registration Number:Registration Date,Lookup
+Patient Registration Number:Patient Name,Lookup
+Patient Registration Number:CNIC Number,Lookup
+Patient Registration Number:Phone Number,Lookup
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
+,
+User Role,
+Email Address,Single line of text
+Role,Choice
+Location,Choice
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
+,
+Delivery Record ,
+Delivery Record ID,Single line of text
+Patient Registration Number,Lookup
+Delivery Centre,Choice
+Mode of Delivery,Choice
+Blood Loss During Delivery,Choice
+Birth Outcome,Choice
+Pregnancy Period Weeks,Choice
+Pregnancy Period Days,Choice
+Date of Delivery,Date and Time
+Death Reason,Multiple lines of text
+Mother Status,Choice
+Mother Death Reason,Multiple lines of text
+Breast Feed During First Hour,Choice
+Colostrum Breastmilk Given,Choice
+Kangaroo Care,Choice
+Feedback on CBK,Multiple lines of text
+Follow-up Date,Date and Time
+Created By Latitude,Number
+Created By Longitude,Number
+Antenatal Visits,Number
+Patient Registration Number:Registration Date,Lookup
+Patient Registration Number:Patient Name,Lookup
+Patient Registration Number:CNIC Number,Lookup
+Modified,Date and Time
+Created,Date and Time
+Patient Registration Number:Phone Number,Lookup
+Created By,Person or Group
+Modified By,Person or Group
+,
+Anemia Performa,
+Anemia Performa ID,Single line of text
+Anemia Checkup ID,Lookup
+Injection Brand,Choice
+Injection Dose,Choice
+Injection Date,Date and Time
+IV Iron Quantity,Choice
+Reaction After Injection,Multiple lines of text
+Created By Latitude,Number
+Created By Longitude,Number
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
+,
+Patient Profile,
+Patient Registration Number,Single line of text
+Registration Date,Date and Time
+Patient Name,Single line of text
+CNIC Number,Single line of text
+Phone Number,Single line of text
+Religion,Choice
+Patient Profession,Single line of text
+Patient Monthly Salary,Single line of text
+Age,Choice
+Address,Multiple lines of text
+Location,Choice
+Estimated Date of Delivery,Date and Time
+Baseline Haemoglobin Count,Single line of text
+Education,Choice
+Residence Condition,Choice
+Residence Ownership,Choice
+Husband Name,Single line of text
+Gravida,Number
+Para,Number
+Miscarriage,Number
+AntenatalVisits,Number
+Created By Latitude,Number
+Created By Longitude,Number
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
+,
+Annual Postnatal Follow-up,
+Annual Postnatal Follow-up ID,Single line of text
+Delivery Record ID,Lookup
+Patient Status,Choice
+Patient Health,Choice
+Baby Status,Choice
+Baby Health,Choice
+Breast Feeding,Choice
+Breast Feeding Duration,Choice
+Patient Health More Details,Multiple lines of text
+Death Reason,Single line of text
+Baby Health More Details,Multiple lines of text
+Birth Spacing Practices,Choice
+Patient Death Reason,Multiple lines of text
+Created By Latitude,Number
+Created By Longitude,Number
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
+,
+Data Export Access,
+Email Address,Single line of text
+Password,Single line of text
+Is Active,Yes/No
+Modified,Date and Time
+Created,Date and Time
+Created By,Person or Group
+Modified By,Person or Group
