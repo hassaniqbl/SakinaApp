@@ -27,6 +27,119 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
+// Register patient
+app.post("/patients", (req, res) => {
+  const {
+    PATIENT_REGISTRATION_NUMBER,
+    REGISTRATION_DATE,
+    PATIENT_NAME,
+    CNIC_NUMBER,
+    PHONE_NUMBER,
+    RELIGION,
+    PATIENT_PROFESSION,
+    PATIENT_MONTHLY_SALARY,
+    AGE,
+    ADDRESS,
+    LOCATION,
+    ESTIMATED_DATE_OF_DELIVERY,
+    BASELINE_HAEMOGLOBIN_COUNT,
+    EDUCATION,
+    RESIDENCE_CONDITION,
+    RESIDENCE_OWNERSHIP,
+    HUSBAND_NAME,
+    GRAVIDA,
+    PARA,
+    MISCARRIAGE,
+    ANTENATAL_VISITS,
+    CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE,
+    CREATED_AT,
+    UPDATED_AT,
+    CREATED_BY,
+    UPDATED_BY,
+  } = req.body;
+
+  if (!PATIENT_REGISTRATION_NUMBER) {
+    return res.status(400).json({
+      message: "PATIENT_REGISTRATION_NUMBER is required",
+    });
+  }
+
+  const sql = `INSERT INTO PATIENT_PROFILE (
+    PATIENT_REGISTRATION_NUMBER,
+    REGISTRATION_DATE,
+    PATIENT_NAME,
+    CNIC_NUMBER,
+    PHONE_NUMBER,
+    RELIGION,
+    PATIENT_PROFESSION,
+    PATIENT_MONTHLY_SALARY,
+    AGE,
+    ADDRESS,
+    LOCATION,
+    ESTIMATED_DATE_OF_DELIVERY,
+    BASELINE_HAEMOGLOBIN_COUNT,
+    EDUCATION,
+    RESIDENCE_CONDITION,
+    RESIDENCE_OWNERSHIP,
+    HUSBAND_NAME,
+    GRAVIDA,
+    PARA,
+    MISCARRIAGE,
+    ANTENATAL_VISITS,
+    CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE,
+    CREATED_AT,
+    UPDATED_AT,
+    CREATED_BY,
+    UPDATED_BY
+  ) VALUES (
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+  )`;
+
+
+  const params = [
+    PATIENT_REGISTRATION_NUMBER,
+    REGISTRATION_DATE || null,
+    PATIENT_NAME || null,
+    CNIC_NUMBER || null,
+    PHONE_NUMBER || null,
+    RELIGION || null,
+    PATIENT_PROFESSION || null,
+    PATIENT_MONTHLY_SALARY || null,
+    AGE || null,
+    ADDRESS || null,
+    LOCATION || null,
+    ESTIMATED_DATE_OF_DELIVERY || null,
+    BASELINE_HAEMOGLOBIN_COUNT || null,
+    EDUCATION || null,
+    RESIDENCE_CONDITION || null,
+    RESIDENCE_OWNERSHIP || null,
+    HUSBAND_NAME || null,
+    GRAVIDA === undefined ? null : GRAVIDA,
+    PARA === undefined ? null : PARA,
+    MISCARRIAGE === undefined ? null : MISCARRIAGE,
+    ANTENATAL_VISITS === undefined ? null : ANTENATAL_VISITS,
+    CREATED_BY_LATITUDE === undefined ? null : CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE === undefined ? null : CREATED_BY_LONGITUDE,
+    CREATED_AT || null,
+    UPDATED_AT || null,
+    CREATED_BY || null,
+    UPDATED_BY || null,
+  ];
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: "Failed to create patient" });
+    }
+    res.status(201).json({
+      message: "Patient Registered Successfully",
+      affectedRows: result?.affectedRows,
+    });
+  });
+});
+
 app.get("/users", (req, res) => {
   db.query("SELECT * FROM users ORDER BY id DESC", (err, result) => {
     if (err) {
