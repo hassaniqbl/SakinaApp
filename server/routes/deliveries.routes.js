@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/deliveries:
+ * /deliveries:
  *   post:
  *     summary: Create delivery
  *     tags: [Deliveries]
@@ -22,6 +22,15 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             example:
+ *               PATIENT_ID: 1
+ *               DELIVERY_DATE: "2024-01-15"
+ *               DELIVERY_TYPE: "Normal"
+ *               DELIVERY_OUTCOME: "Live Birth"
+ *               BABY_WEIGHT: 3.5
+ *               BABY_GENDER: "Male"
+ *               COMPLICATIONS: "None"
+ *               DELIVERED_BY: 1
  *     responses:
  *       201:
  *         description: Created
@@ -30,7 +39,7 @@ router.post("/deliveries", authMiddleware, createDelivery);
 
 /**
  * @swagger
- * /api/deliveries:
+ * /deliveries:
  *   get:
  *     summary: Get deliveries list
  *     tags: [Deliveries]
@@ -42,7 +51,7 @@ router.get("/deliveries", authMiddleware, getDeliveries);
 
 /**
  * @swagger
- * /api/deliveries/{id}:
+ * /deliveries/{id}:
  *   get:
  *     summary: Get delivery by id
  *     tags: [Deliveries]
@@ -60,7 +69,7 @@ router.get("/deliveries/:id", authMiddleware, getDeliveryByIdCtrl);
 
 /**
  * @swagger
- * /api/deliveries/{id}:
+ * /deliveries/{id}:
  *   put:
  *     summary: Update delivery
  *     tags: [Deliveries]
@@ -83,7 +92,7 @@ router.put("/deliveries/:id", authMiddleware, updateDeliveryCtrl);
 
 /**
  * @swagger
- * /api/deliveries/{id}:
+ * /deliveries/{id}:
  *   delete:
  *     summary: Delete delivery
  *     tags: [Deliveries]

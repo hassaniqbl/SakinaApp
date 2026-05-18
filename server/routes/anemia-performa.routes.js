@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/anemia-performa:
+ * /anemia-performa:
  *   post:
  *     summary: Create anemia performa
  *     tags: [Anemia Performa]
@@ -22,6 +22,14 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             example:
+ *               PATIENT_ID: 1
+ *               PERFORMA_DATE: "2024-01-15"
+ *               SYMPTOMS: "Fatigue, weakness"
+ *               PHYSICAL_EXAMINATION: "Pale conjunctiva"
+ *               LAB_RESULTS: "Hb 9.5 g/dL"
+ *               DIAGNOSIS: "Iron deficiency anemia"
+ *               TREATMENT_PLAN: "Iron supplements, dietary changes"
  *     responses:
  *       201:
  *         description: Created
@@ -30,7 +38,7 @@ router.post("/anemia-performa", authMiddleware, createAnemiaPerforma);
 
 /**
  * @swagger
- * /api/anemia-performa:
+ * /anemia-performa:
  *   get:
  *     summary: Get anemia performas list
  *     tags: [Anemia Performa]
@@ -42,7 +50,7 @@ router.get("/anemia-performa", authMiddleware, getAnemiaPerformas);
 
 /**
  * @swagger
- * /api/anemia-performa/{id}:
+ * /anemia-performa/{id}:
  *   get:
  *     summary: Get anemia performa by id
  *     tags: [Anemia Performa]
@@ -60,7 +68,7 @@ router.get("/anemia-performa/:id", authMiddleware, getAnemiaPerformaByIdCtrl);
 
 /**
  * @swagger
- * /api/anemia-performa/{id}:
+ * /anemia-performa/{id}:
  *   put:
  *     summary: Update anemia performa
  *     tags: [Anemia Performa]
@@ -83,7 +91,7 @@ router.put("/anemia-performa/:id", authMiddleware, updateAnemiaPerformaCtrl);
 
 /**
  * @swagger
- * /api/anemia-performa/{id}:
+ * /anemia-performa/{id}:
  *   delete:
  *     summary: Delete anemia performa
  *     tags: [Anemia Performa]

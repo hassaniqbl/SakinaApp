@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/annual-checkups:
+ * /annual-checkups:
  *   post:
  *     summary: Create annual checkup
  *     tags: [Annual Checkups]
@@ -22,6 +22,15 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             example:
+ *               PATIENT_ID: 1
+ *               CHECKUP_DATE: "2024-01-15"
+ *               GENERAL_HEALTH: "Good"
+ *               BLOOD_PRESSURE: "120/80"
+ *               WEIGHT: 65
+ *               HEIGHT: 165
+ *               BMI: 23.9
+ *               NOTES: "Annual checkup completed"
  *     responses:
  *       201:
  *         description: Created
@@ -30,7 +39,7 @@ router.post("/annual-checkups", authMiddleware, createAnnualCheckup);
 
 /**
  * @swagger
- * /api/annual-checkups:
+ * /annual-checkups:
  *   get:
  *     summary: Get annual checkups list
  *     tags: [Annual Checkups]
@@ -42,7 +51,7 @@ router.get("/annual-checkups", authMiddleware, getAnnualCheckups);
 
 /**
  * @swagger
- * /api/annual-checkups/{id}:
+ * /annual-checkups/{id}:
  *   get:
  *     summary: Get annual checkup by id
  *     tags: [Annual Checkups]
@@ -60,7 +69,7 @@ router.get("/annual-checkups/:id", authMiddleware, getAnnualCheckupByIdCtrl);
 
 /**
  * @swagger
- * /api/annual-checkups/{id}:
+ * /annual-checkups/{id}:
  *   put:
  *     summary: Update annual checkup
  *     tags: [Annual Checkups]
@@ -83,7 +92,7 @@ router.put("/annual-checkups/:id", authMiddleware, updateAnnualCheckupCtrl);
 
 /**
  * @swagger
- * /api/annual-checkups/{id}:
+ * /annual-checkups/{id}:
  *   delete:
  *     summary: Delete annual checkup
  *     tags: [Annual Checkups]

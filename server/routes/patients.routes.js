@@ -8,7 +8,9 @@ const {
   deletePatientCtrl,
 } = require("../modules/patients/patients.controller");
 
+// Auth disabled for testing
 const { authMiddleware } = require("../middleware/auth.middleware");
+
 
 const router = express.Router();
 
@@ -20,8 +22,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/patients:
+ * /patients:
  *   post:
+
  *     summary: Create patient
  *     tags: [Patients]
  *     requestBody:
@@ -38,8 +41,9 @@ router.post("/patients", authMiddleware, createPatient);
 
 /**
  * @swagger
- * /api/patients:
+ * /patients:
  *   get:
+
  *     summary: Get list of patients
  *     tags: [Patients]
  *     responses:
@@ -50,8 +54,9 @@ router.get("/patients", authMiddleware, getPatients);
 
 /**
  * @swagger
- * /api/patients/{id}:
+ * /patients/{id}:
  *   get:
+
  *     summary: Get patient by id
  *     tags: [Patients]
  *     parameters:
@@ -70,8 +75,9 @@ router.get("/patients/:id", authMiddleware, getPatientByIdCtrl);
 
 /**
  * @swagger
- * /api/patients/{id}:
+ * /patients/{id}:
  *   put:
+
  *     summary: Update patient by id
  *     tags: [Patients]
  *     parameters:
@@ -93,8 +99,9 @@ router.put("/patients/:id", authMiddleware, updatePatientCtrl);
 
 /**
  * @swagger
- * /api/patients/{id}:
+ * /patients/{id}:
  *   delete:
+
  *     summary: Delete patient by id
  *     tags: [Patients]
  *     parameters:

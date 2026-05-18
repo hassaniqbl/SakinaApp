@@ -29,8 +29,7 @@ app.get('/api-docs/swagger.json', (req, res) => {
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.use("/api", apiRoutes);
-
+app.use("/", apiRoutes);
 
 app.use(errorHandler);
 

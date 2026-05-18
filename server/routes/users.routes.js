@@ -6,7 +6,9 @@ const {
   updateUserCtrl,
   deleteUserCtrl,
 } = require("../modules/users/users.controller");
+// Temporary: auth disabled for testing
 const { authMiddleware } = require("../middleware/auth.middleware");
+
 
 const router = express.Router();
 
@@ -18,7 +20,7 @@ const router = express.Router();
  */
 /**
  * @swagger
- * /api/users:
+ * /users:
  *   post:
  *     summary: Create user
  *     tags: [Users]
@@ -36,7 +38,7 @@ router.post("/users", authMiddleware, createUser);
 
 /**
  * @swagger
- * /api/users:
+ * /users:
  *   get:
  *     summary: Get list of users
  *     tags: [Users]
@@ -48,7 +50,7 @@ router.get("/users", authMiddleware, getUsers);
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/{id}:
  *   get:
  *     summary: Get user by id
  *     tags: [Users]
@@ -68,7 +70,7 @@ router.get("/users/:id", authMiddleware, getUserByIdCtrl);
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/{id}:
  *   put:
  *     summary: Update user by id
  *     tags: [Users]
@@ -83,6 +85,11 @@ router.get("/users/:id", authMiddleware, getUserByIdCtrl);
  *         application/json:
  *           schema:
  *             type: object
+ *             example:
+ *               USERNAME: "doctor1_updated"
+ *               EMAIL: "doctor_updated@example.com"
+ *               FULL_NAME: "Dr. John Smith"
+ *               PHONE: "03119998888"
  *     responses:
  *       200:
  *         description: User updated
@@ -91,7 +98,7 @@ router.put("/users/:id", authMiddleware, updateUserCtrl);
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/{id}:
  *   delete:
  *     summary: Delete user by id
  *     tags: [Users]

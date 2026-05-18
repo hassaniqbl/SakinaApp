@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/six-week-checkups:
+ * /six-week-checkups:
  *   post:
  *     summary: Create six-week checkup
  *     tags: [Six Week Checkups]
@@ -22,6 +22,14 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             example:
+ *               PATIENT_ID: 1
+ *               CHECKUP_DATE: "2024-01-15"
+ *               MOTHER_HEALTH: "Good"
+ *               BABY_HEALTH: "Good"
+ *               BREASTFEEDING: "Yes"
+ *               CONTRACEPTION: "None"
+ *               NOTES: "Mother recovering well"
  *     responses:
  *       201:
  *         description: Created
@@ -30,7 +38,7 @@ router.post("/six-week-checkups", authMiddleware, createSixWeekCheckup);
 
 /**
  * @swagger
- * /api/six-week-checkups:
+ * /six-week-checkups:
  *   get:
  *     summary: Get six-week checkups list
  *     tags: [Six Week Checkups]
@@ -42,7 +50,7 @@ router.get("/six-week-checkups", authMiddleware, getSixWeekCheckups);
 
 /**
  * @swagger
- * /api/six-week-checkups/{id}:
+ * /six-week-checkups/{id}:
  *   get:
  *     summary: Get six-week checkup by id
  *     tags: [Six Week Checkups]
@@ -60,7 +68,7 @@ router.get("/six-week-checkups/:id", authMiddleware, getSixWeekCheckupByIdCtrl);
 
 /**
  * @swagger
- * /api/six-week-checkups/{id}:
+ * /six-week-checkups/{id}:
  *   put:
  *     summary: Update six-week checkup
  *     tags: [Six Week Checkups]
@@ -83,7 +91,7 @@ router.put("/six-week-checkups/:id", authMiddleware, updateSixWeekCheckupCtrl);
 
 /**
  * @swagger
- * /api/six-week-checkups/{id}:
+ * /six-week-checkups/{id}:
  *   delete:
  *     summary: Delete six-week checkup
  *     tags: [Six Week Checkups]

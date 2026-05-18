@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/anemia-checkups:
+ * /anemia-checkups:
  *   post:
  *     summary: Create anemia checkup
  *     tags: [Anemia Checkups]
@@ -22,6 +22,13 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             example:
+ *               PATIENT_ID: 1
+ *               CHECKUP_DATE: "2024-01-15"
+ *               HAEMOGLOBIN_LEVEL: 10.5
+ *               IRON_SUPPLEMENTS: "Yes"
+ *               FOLIC_ACID: "Yes"
+ *               NOTES: "Patient responding well"
  *     responses:
  *       201:
  *         description: Created
@@ -30,7 +37,7 @@ router.post("/anemia-checkups", authMiddleware, createAnemiaCheckup);
 
 /**
  * @swagger
- * /api/anemia-checkups:
+ * /anemia-checkups:
  *   get:
  *     summary: Get anemia checkups list
  *     tags: [Anemia Checkups]
@@ -42,7 +49,7 @@ router.get("/anemia-checkups", authMiddleware, getAnemiaCheckups);
 
 /**
  * @swagger
- * /api/anemia-checkups/{id}:
+ * /anemia-checkups/{id}:
  *   get:
  *     summary: Get anemia checkup by id
  *     tags: [Anemia Checkups]
@@ -60,7 +67,7 @@ router.get("/anemia-checkups/:id", authMiddleware, getAnemiaCheckupByIdCtrl);
 
 /**
  * @swagger
- * /api/anemia-checkups/{id}:
+ * /anemia-checkups/{id}:
  *   put:
  *     summary: Update anemia checkup
  *     tags: [Anemia Checkups]
@@ -83,7 +90,7 @@ router.put("/anemia-checkups/:id", authMiddleware, updateAnemiaCheckupCtrl);
 
 /**
  * @swagger
- * /api/anemia-checkups/{id}:
+ * /anemia-checkups/{id}:
  *   delete:
  *     summary: Delete anemia checkup
  *     tags: [Anemia Checkups]

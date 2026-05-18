@@ -49,7 +49,6 @@ const mapRequestToPatientProfile = (body) => {
     age: null,
     address: toNullable(body.address),
     city: toNullable(body.city),
-
     estimated_date_of_delivery: null,
     baseline_haemoglobin_count: null,
     education: null,
