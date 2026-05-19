@@ -6,11 +6,82 @@ const {
   updateUserCtrl,
   deleteUserCtrl,
 } = require("../modules/users/users.controller");
-// Temporary: auth disabled for testing
+
 const { authMiddleware } = require("../middleware/auth.middleware");
 
-
 const router = express.Router();
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CreateUserRequest:
+ *       type: object
+ *       required:
+ *         - EMAIL
+ *         - PASS
+ *       properties:
+ *         EMAIL:
+ *           type: string
+ *           example: admin@example.com
+ *         PASS:
+ *           type: string
+ *           example: Admin@123
+ *         USER_ROLE:
+ *           type: string
+ *           example: ADMIN
+ *         LOCATION_ID:
+ *           type: integer
+ *           example: 1
+ *         FIRSTNAME:
+ *           type: string
+ *           example: Hassan
+ *         LASTNAME:
+ *           type: string
+ *           example: Iqbal
+ *         CONTACT:
+ *           type: string
+ *           example: +923001234567
+ *         ADDRESS:
+ *           type: string
+ *           example: Rawalpindi Pakistan
+ *         PROFILE_PICTURE_URL:
+ *           type: string
+ *           example: https://example.com/profile.jpg
+ *         added_by:
+ *           type: integer
+ *           example: 1
+ *
+ *     UpdateUserRequest:
+ *       type: object
+ *       required:
+ *         - EMAIL
+ *       properties:
+ *         EMAIL:
+ *           type: string
+ *           example: updated@example.com
+ *         USER_ROLE:
+ *           type: string
+ *           example: STAFF
+ *         LOCATION_ID:
+ *           type: integer
+ *           example: 2
+ *         FIRSTNAME:
+ *           type: string
+ *           example: Ali
+ *         LASTNAME:
+ *           type: string
+ *           example: Raza
+ *         CONTACT:
+ *           type: string
+ *           example: +923009998887
+ *         ADDRESS:
+ *           type: string
+ *           example: Islamabad Pakistan
+ *         PROFILE_PICTURE_URL:
+ *           type: string
+ *           example: https://example.com/new-profile.jpg
+ */
 
 /**
  * @swagger
@@ -18,6 +89,7 @@ const router = express.Router();
  *   name: Users
  *   description: CRUD APIs for SC_USER
  */
+
 /**
  * @swagger
  * /users:
@@ -29,10 +101,21 @@ const router = express.Router();
  *       content:
  *         application/json:
  *           schema:
- *             type: object
+ *             $ref: '#/components/schemas/CreateUserRequest'
+ *           example:
+ *             EMAIL: admin@example.com
+ *             PASS: Admin@123
+ *             USER_ROLE: ADMIN
+ *             LOCATION_ID: 1
+ *             FIRSTNAME: Hassan
+ *             LASTNAME: Iqbal
+ *             CONTACT: +923001234567
+ *             ADDRESS: Rawalpindi Pakistan
+ *             PROFILE_PICTURE_URL: https://example.com/profile.jpg
+ *             added_by: 1
  *     responses:
  *       201:
- *         description: User created
+ *         description: User created successfully
  */
 router.post("/users", authMiddleware, createUser);
 
@@ -59,12 +142,13 @@ router.get("/users", authMiddleware, getUsers);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *         example: 1
  *     responses:
  *       200:
  *         description: User object
  *       404:
- *         description: Not found
+ *         description: User not found
  */
 router.get("/users/:id", authMiddleware, getUserByIdCtrl);
 
@@ -79,20 +163,26 @@ router.get("/users/:id", authMiddleware, getUserByIdCtrl);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *         example: 1
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             example:
- *               USERNAME: "doctor1_updated"
- *               EMAIL: "doctor_updated@example.com"
- *               FULL_NAME: "Dr. John Smith"
- *               PHONE: "03119998888"
+ *             $ref: '#/components/schemas/UpdateUserRequest'
+ *           example:
+ *             EMAIL: updated@example.com
+ *             USER_ROLE: STAFF
+ *             LOCATION_ID: 2
+ *             FIRSTNAME: Ali
+ *             LASTNAME: Raza
+ *             CONTACT: +923009998887
+ *             ADDRESS: Islamabad Pakistan
+ *             PROFILE_PICTURE_URL: https://example.com/new-profile.jpg
  *     responses:
  *       200:
- *         description: User updated
+ *         description: User updated successfully
  */
 router.put("/users/:id", authMiddleware, updateUserCtrl);
 
@@ -107,12 +197,12 @@ router.put("/users/:id", authMiddleware, updateUserCtrl);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *           type: integer
+ *         example: 1
  *     responses:
  *       200:
- *         description: User deleted (soft)
+ *         description: User deleted successfully
  */
 router.delete("/users/:id", authMiddleware, deleteUserCtrl);
 
 module.exports = router;
-

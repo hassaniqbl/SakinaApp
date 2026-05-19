@@ -33,32 +33,45 @@ const insertUser = async (db, payload) => {
   return result;
 };
 
-const getAllUsers = async (db, { page, limit, offset }, { searchClause, searchParams, filterClause, filterParams }, { sortBy, sortOrder }) => {
-  const where = ["u.IS_DELETED = b'0'"]
+const getAllUsers = async (
+  db,
+  { page, limit, offset },
+  { searchClause, searchParams, filterClause, filterParams },
+  { sortBy, sortOrder }
+) => {
+  const whereParts = ["u.IS_DELETED = b'0'"]
     .concat(filterClause ? [filterClause] : [])
-    .concat(searchClause ? [searchClause] : [])
-    .filter(Boolean)
-    .join(" AND ");
+    .concat(searchClause ? [searchClause] : []);
 
-  const sql = `SELECT SQL_CALC_FOUND_ROWS ${buildUserSelect("FROM SC_USER u")} 
-    ${filterClause || searchClause ? "" : ""}
+  const where = whereParts.filter(Boolean).join(" AND ");
+
+  // IMPORTANT: `sortBy` is validated in controller (ALLOWED_SORT). Still, keep SQL safe.
+  // Avoid accidental injection of invalid/undefined columns.
+  // `sortBy` should already be validated, but guard against missing/invalid values.
+  const orderByColumn = sortBy && sortBy !== "undefined" ? String(sortBy) : "DATE_CREATED";
+  const orderByDir = sortOrder === "ASC" ? "ASC" : "DESC";
+
+
+  const finalSelect = `
+    SELECT
+      u.USER_ID, u.IS_DELETED, u.ADDED_BY, u.UPDATED_BY, u.DATE_CREATED, u.DATE_UPDATED,
+      u.EMAIL, u.USER_ROLE, u.LOCATION_ID, u.FIRSTNAME, u.LASTNAME, u.CONTACT, u.ADDRESS, u.PROFILE_PICTURE_URL
+    FROM SC_USER u
+    WHERE ${where}
+    ORDER BY u.${orderByColumn} ${orderByDir}
+    LIMIT ? OFFSET ?
   `;
 
-  const base = `FROM SC_USER u`;
-  const finalSelect = `SELECT u.USER_ID, u.IS_DELETED, u.ADDED_BY, u.UPDATED_BY, u.DATE_CREATED, u.DATE_UPDATED,
-    u.EMAIL, u.USER_ROLE, u.LOCATION_ID, u.FIRSTNAME, u.LASTNAME, u.CONTACT, u.ADDRESS, u.PROFILE_PICTURE_URL
-    ${base}
-    WHERE ${where}
-    ORDER BY u.${sortBy} ${sortOrder}
-    LIMIT ? OFFSET ?`;
+  const commonParams = [...(filterParams || []), ...(searchParams || [])];
+  const rowsParams = [...commonParams, limit, offset];
 
-  const params = [...filterParams, ...searchParams, limit, offset];
-  const [rows] = await db.promise().query(finalSelect, params);
+  const [rows] = await db.promise().query(finalSelect, rowsParams);
+
   const [countRows] = await db
     .promise()
-    .query(`SELECT COUNT(*) as total FROM SC_USER u WHERE ${where}`, [...filterParams, ...searchParams]);
+    .query(`SELECT COUNT(*) as total FROM SC_USER u WHERE ${where}`, commonParams);
 
-  const total = countRows[0]?.total || 0;
+  const total = countRows?.[0]?.total || 0;
   return { rows, total };
 };
 

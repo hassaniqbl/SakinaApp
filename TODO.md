@@ -1,6 +1,8 @@
-# TODO - Auth disabled for API testing
+# TODO
 
-- [x] Implement DISABLE_AUTH flag support in `server/middleware/auth.middleware.js`
-- [ ] Ensure running server uses the same `DISABLE_AUTH` env var (stop old processes, restart clean)
-- [ ] If env var still not applied, provide a hard-coded “public mode” toggle (no env dependency) and re-test
+## Implement fix for `GET /users` returning 500
+
+- [ ] Fix SQL query construction in `server/modules/users/users.model.js#getAllUsers` to avoid runtime MySQL errors and align params.
+- [ ] Improve error middleware to include `err.message` details for easier debugging.
+- [ ] Restart server using `server/server.js` (or confirm currently running entrypoint) and verify `curl http://localhost:5000/users` works.
 

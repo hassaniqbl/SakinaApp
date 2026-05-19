@@ -7,10 +7,14 @@ module.exports = (err, req, res, next) => {
 
   const payload = isHttpError(err)
     ? errorResponse(err.message || "Something went wrong", err.details || err)
-    : errorResponse("Something went wrong", err);
+    : errorResponse("Something went wrong", {
+        message: err?.message,
+        code: err?.code,
+        sqlMessage: err?.sqlMessage,
+      });
 
+  // Always log the full error object for server-side debugging
   if (status >= 500) {
-    // avoid leaking internals for client-facing errors
     console.error(err);
   }
 

@@ -54,11 +54,21 @@ const createUser = asyncHandler(async (req, res) => {
 
   const hashed = await bcrypt.hash(String(PASS), 10);
 
+  // Normalize LOCATION_ID to avoid FK failures:
+  // - treat empty/undefined/null as NULL
+  // - coerce numeric strings to number
+  // - if invalid, set NULL (FK allows NULL)
+  const normalizedLocationId = (() => {
+    if (LOCATION_ID === undefined || LOCATION_ID === null || LOCATION_ID === "") return null;
+    const n = Number(LOCATION_ID);
+    return Number.isFinite(n) ? n : null;
+  })();
+
   const payload = {
     EMAIL: String(EMAIL).trim(),
     PASS: hashed,
     USER_ROLE: USER_ROLE || null,
-    LOCATION_ID: LOCATION_ID || null,
+    LOCATION_ID: normalizedLocationId,
     FIRSTNAME: FIRSTNAME || null,
     LASTNAME: LASTNAME || null,
     CONTACT: CONTACT || null,
@@ -67,6 +77,7 @@ const createUser = asyncHandler(async (req, res) => {
     ADDED_BY: added_by ?? req.user?.user_id ?? null,
     UPDATED_BY: req.user?.user_id ?? null,
   };
+
 
   const db = req.app.locals.db;
   const result = await insertUser(db, payload);
@@ -133,24 +144,83 @@ const updateUserCtrl = asyncHandler(async (req, res) => {
     PROFILE_PICTURE_URL,
   } = req.body || {};
 
-  if (!EMAIL) throw new HttpError(400, "EMAIL is required");
+  // Validate required fields
+  if (!EMAIL) {
+    throw new HttpError(400, "EMAIL is required");
+  }
 
+  // Normalize LOCATION_ID
+  let normalizedLocationId = null;
+
+  if (
+    LOCATION_ID !== undefined &&
+    LOCATION_ID !== null &&
+    LOCATION_ID !== ""
+  ) {
+    const parsedLocationId = Number(LOCATION_ID);
+
+    if (!Number.isFinite(parsedLocationId)) {
+      throw new HttpError(400, "Invalid LOCATION_ID");
+    }
+
+    // Validate LOCATION_ID exists
+    const locationRows = await new Promise((resolve, reject) => {
+      db.query(
+        `
+        SELECT LOCATION_ID
+        FROM adm_location
+        WHERE LOCATION_ID = ?
+        LIMIT 1
+        `,
+        [parsedLocationId],
+        (err, rows) => {
+          if (err) {
+            return reject(err);
+          }
+
+          resolve(rows);
+        }
+      );
+    });
+
+    if (!locationRows.length) {
+      throw new HttpError(400, "LOCATION_ID does not exist");
+    }
+
+    normalizedLocationId = parsedLocationId;
+  }
+
+  // Prepare payload
   const payload = {
     UPDATED_BY: req.user?.user_id ?? null,
     EMAIL: String(EMAIL).trim(),
-    USER_ROLE: USER_ROLE || null,
-    LOCATION_ID: LOCATION_ID || null,
-    FIRSTNAME: FIRSTNAME || null,
-    LASTNAME: LASTNAME || null,
-    CONTACT: CONTACT || null,
-    ADDRESS: ADDRESS || null,
-    PROFILE_PICTURE_URL: PROFILE_PICTURE_URL || null,
+    USER_ROLE: USER_ROLE ? String(USER_ROLE).trim() : null,
+    LOCATION_ID: normalizedLocationId,
+    FIRSTNAME: FIRSTNAME ? String(FIRSTNAME).trim() : null,
+    LASTNAME: LASTNAME ? String(LASTNAME).trim() : null,
+    CONTACT: CONTACT ? String(CONTACT).trim() : null,
+    ADDRESS: ADDRESS ? String(ADDRESS).trim() : null,
+    PROFILE_PICTURE_URL: PROFILE_PICTURE_URL
+      ? String(PROFILE_PICTURE_URL).trim()
+      : null,
   };
 
+  // Update user
   const result = await updateUser(db, id, payload);
-  if (!result.affectedRows) throw new HttpError(404, "User not found");
 
-  return res.status(200).json(successResponse("User updated successfully", { affectedRows: result.affectedRows }, {}));
+  if (!result.affectedRows) {
+    throw new HttpError(404, "User not found");
+  }
+
+  return res.status(200).json(
+    successResponse(
+      "User updated successfully",
+      {
+        affectedRows: result.affectedRows,
+      },
+      {}
+    )
+  );
 });
 
 const deleteUserCtrl = asyncHandler(async (req, res) => {

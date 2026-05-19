@@ -1,14 +1,51 @@
+const normalizeDeliveryRow = (row) => {
+  if (!row || typeof row !== "object") return row;
+
+  // MySQL may return BIT/BINARY columns as Buffer.
+  // Example observed: IS_DELETED: { type: 'Buffer', data: [0] }
+  if (row.IS_DELETED && Buffer.isBuffer(row.IS_DELETED)) {
+    row.IS_DELETED = row.IS_DELETED.length ? row.IS_DELETED[0] : 0;
+  }
+
+  return row;
+};
+
 const insertDelivery = async (db, payload) => {
   const sql = `INSERT INTO SC_DELIVERY (
-    IS_DELETED, ADDED_BY, UPDATED_BY,
+    IS_DELETED,
+    ADDED_BY,
+    UPDATED_BY,
     PATIENT_ID,
-    DATE_CREATED, DATE_UPDATED
-  ) VALUES (b'0', ?, ?, ?, NOW(), NOW())`;
+    DELIVERY_DATE,
+    DELIVERY_TYPE,
+    DELIVERY_OUTCOME,
+    BABY_WEIGHT,
+    BABY_GENDER,
+    COMPLICATIONS,
+    DELIVERED_BY,
+    DATE_CREATED,
+    DATE_UPDATED
+  ) VALUES (
+    b'0', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW()
+  )`;
 
-  const params = [payload.ADDED_BY || null, payload.UPDATED_BY || null, payload.PATIENT_ID];
+  const params = [
+    payload.ADDED_BY || null,
+    payload.UPDATED_BY || null,
+    payload.PATIENT_ID,
+    payload.DELIVERY_DATE || null,
+    payload.DELIVERY_TYPE || null,
+    payload.DELIVERY_OUTCOME || null,
+    payload.BABY_WEIGHT || null,
+    payload.BABY_GENDER || null,
+    payload.COMPLICATIONS || null,
+    payload.DELIVERED_BY || null,
+  ];
+
   const [result] = await db.promise().execute(sql, params);
   return result;
 };
+
 
 const getAllDeliveries = async (
   db,
@@ -24,8 +61,7 @@ const getAllDeliveries = async (
     .join(" AND ");
 
   const sql = `
-    SELECT d.DELIVERY_ID, d.IS_DELETED, d.ADDED_BY, d.UPDATED_BY, d.DATE_CREATED, d.DATE_UPDATED,
-           d.PATIENT_ID
+    SELECT d.*
     FROM SC_DELIVERY d
     WHERE ${where}
     ORDER BY d.${sortBy} ${sortOrder}
@@ -35,18 +71,21 @@ const getAllDeliveries = async (
   const params = [...filterParams, ...searchParams, limit, offset];
   const [rows] = await db.promise().query(sql, params);
 
+  const normalizedRows = rows.map(normalizeDeliveryRow);
+
   const [countRows] = await db
     .promise()
     .query(`SELECT COUNT(*) as total FROM SC_DELIVERY d WHERE ${where}`, [...filterParams, ...searchParams]);
 
-  return { rows, total: countRows[0]?.total || 0 };
+  return { rows: normalizedRows, total: countRows[0]?.total || 0 };
 };
 
 const getDeliveryById = async (db, id) => {
   const [rows] = await db
     .promise()
     .query(`SELECT * FROM SC_DELIVERY WHERE DELIVERY_ID = ? AND IS_DELETED = b'0'`, [id]);
-  return rows[0] || null;
+
+  return normalizeDeliveryRow(rows[0] || null);
 };
 
 const updateDelivery = async (db, id, payload) => {
@@ -77,4 +116,5 @@ module.exports = {
   updateDelivery,
   softDeleteDelivery,
 };
+
 
