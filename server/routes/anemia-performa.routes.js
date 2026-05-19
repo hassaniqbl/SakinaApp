@@ -23,13 +23,15 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             example:
- *               PATIENT_ID: 1
- *               PERFORMA_DATE: "2024-01-15"
- *               SYMPTOMS: "Fatigue, weakness"
- *               PHYSICAL_EXAMINATION: "Pale conjunctiva"
- *               LAB_RESULTS: "Hb 9.5 g/dL"
- *               DIAGNOSIS: "Iron deficiency anemia"
- *               TREATMENT_PLAN: "Iron supplements, dietary changes"
+ *               ANEMIA_CHECKUP_ID: 1
+ *               INJECTION_BRAND: 2
+ *               INJECTION_DOSE: 100
+ *               IV_IRON_QUANTITY: 300
+ *               INJECTION_DATE: "2024-01-15"
+ *               REACTION_AFTER_INJECTION: "No reaction"
+ *               DATA_SOURCE: "APP"
+ *               CREATED_BY_LATITUDE: 31.5204
+ *               CREATED_BY_LONGITUDE: 74.3587
  *     responses:
  *       201:
  *         description: Created

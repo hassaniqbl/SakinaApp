@@ -13,14 +13,50 @@ const {
 
 const ALLOWED_SORT = ["ANEMIA_PERFORMA_ID", "ANEMIA_CHECKUP_ID", "DATE_CREATED", "DATE_UPDATED"];
 
+const ALLOWED_DATA_SOURCE = new Set(["APP", "WEB"]);
+
+const requireNumberOrNull = (value, fieldName) => {
+  if (value === undefined || value === null || value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n)) throw new HttpError(400, `${fieldName} must be a number`);
+  return n;
+};
+
+const validateDataSourceIfProvided = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  if (!ALLOWED_DATA_SOURCE.has(value)) throw new HttpError(400, "DATA_SOURCE must be only: APP or WEB");
+  return value;
+};
+
 const createAnemiaPerforma = asyncHandler(async (req, res) => {
-  const { ANEMIA_CHECKUP_ID } = req.body || {};
+  const {
+    ANEMIA_CHECKUP_ID,
+    INJECTION_BRAND,
+    INJECTION_DOSE,
+    IV_IRON_QUANTITY,
+    INJECTION_DATE,
+    REACTION_AFTER_INJECTION,
+    DATA_SOURCE,
+    CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE,
+  } = req.body || {};
+
   if (!ANEMIA_CHECKUP_ID) throw new HttpError(400, "ANEMIA_CHECKUP_ID is required");
 
   const payload = {
     ADDED_BY: req.user?.user_id ?? null,
     UPDATED_BY: req.user?.user_id ?? null,
+
     ANEMIA_CHECKUP_ID,
+    INJECTION_BRAND: requireNumberOrNull(INJECTION_BRAND, "INJECTION_BRAND"),
+    INJECTION_DOSE: requireNumberOrNull(INJECTION_DOSE, "INJECTION_DOSE"),
+    IV_IRON_QUANTITY: requireNumberOrNull(IV_IRON_QUANTITY, "IV_IRON_QUANTITY"),
+    INJECTION_DATE: INJECTION_DATE ?? null,
+    REACTION_AFTER_INJECTION: REACTION_AFTER_INJECTION ?? null,
+
+    DATA_SOURCE: validateDataSourceIfProvided(DATA_SOURCE),
+    CREATED_BY_LATITUDE: requireNumberOrNull(CREATED_BY_LATITUDE, "CREATED_BY_LATITUDE"),
+    CREATED_BY_LONGITUDE: requireNumberOrNull(CREATED_BY_LONGITUDE, "CREATED_BY_LONGITUDE"),
   };
 
   const result = await insertAnemiaPerforma(req.app.locals.db, payload);
@@ -72,13 +108,36 @@ const getAnemiaPerformaByIdCtrl = asyncHandler(async (req, res) => {
 });
 
 const updateAnemiaPerformaCtrl = asyncHandler(async (req, res) => {
-  const { ANEMIA_CHECKUP_ID } = req.body || {};
+  const {
+    ANEMIA_CHECKUP_ID,
+    INJECTION_BRAND,
+    INJECTION_DOSE,
+    IV_IRON_QUANTITY,
+    INJECTION_DATE,
+    REACTION_AFTER_INJECTION,
+    DATA_SOURCE,
+    CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE,
+  } = req.body || {};
+
   if (!ANEMIA_CHECKUP_ID) throw new HttpError(400, "ANEMIA_CHECKUP_ID is required");
 
-  const result = await updateAnemiaPerforma(req.app.locals.db, req.params.id, {
+  const payload = {
     UPDATED_BY: req.user?.user_id ?? null,
+
     ANEMIA_CHECKUP_ID,
-  });
+    INJECTION_BRAND: requireNumberOrNull(INJECTION_BRAND, "INJECTION_BRAND"),
+    INJECTION_DOSE: requireNumberOrNull(INJECTION_DOSE, "INJECTION_DOSE"),
+    IV_IRON_QUANTITY: requireNumberOrNull(IV_IRON_QUANTITY, "IV_IRON_QUANTITY"),
+    INJECTION_DATE: INJECTION_DATE ?? null,
+    REACTION_AFTER_INJECTION: REACTION_AFTER_INJECTION ?? null,
+
+    DATA_SOURCE: validateDataSourceIfProvided(DATA_SOURCE),
+    CREATED_BY_LATITUDE: requireNumberOrNull(CREATED_BY_LATITUDE, "CREATED_BY_LATITUDE"),
+    CREATED_BY_LONGITUDE: requireNumberOrNull(CREATED_BY_LONGITUDE, "CREATED_BY_LONGITUDE"),
+  };
+
+  const result = await updateAnemiaPerforma(req.app.locals.db, req.params.id, payload);
 
   if (!result.affectedRows) throw new HttpError(404, "Anemia performa not found");
 

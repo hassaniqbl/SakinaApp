@@ -25,15 +25,17 @@ const router = express.Router();
  *             example:
  *               PATIENT_ID: 1
  *               CHECKUP_DATE: "2024-01-15"
- *               HAEMOGLOBIN_LEVEL: 10.5
- *               IRON_SUPPLEMENTS: "Yes"
- *               FOLIC_ACID: "Yes"
- *               NOTES: "Patient responding well"
+ *               HAEMOGLOBIN_COUNT: 10.5
+ *               ANY_OTHER_SYMPTOMS: "Patient responding well"
+ *               DATA_SOURCE: "APP"
+ *               CREATED_BY_LATITUDE: 31.5204
+ *               CREATED_BY_LONGITUDE: 74.3587
  *     responses:
  *       201:
  *         description: Created
  */
 router.post("/anemia-checkups", authMiddleware, createAnemiaCheckup);
+
 
 /**
  * @swagger
@@ -92,6 +94,7 @@ router.put("/anemia-checkups/:id", authMiddleware, updateAnemiaCheckupCtrl);
  * @swagger
  * /anemia-checkups/{id}:
  *   delete:
+
  *     summary: Delete anemia checkup
  *     tags: [Anemia Checkups]
  *     parameters:

@@ -13,19 +13,53 @@ const {
 
 const ALLOWED_SORT = ["ANEMIA_CHECKUP_ID", "PATIENT_ID", "DATE_CREATED", "DATE_UPDATED"];
 
+const ALLOWED_DATA_SOURCE = new Set(["APP", "WEB"]);
+
+const requireNumberOrNull = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n)) throw new HttpError(400, "HAEMOGLOBIN_COUNT must be a number");
+  return n;
+};
+
+const validateDataSourceIfProvided = (value) => {
+  if (value === undefined || value === null || value === "") return null;
+  if (!ALLOWED_DATA_SOURCE.has(value)) throw new HttpError(400, "DATA_SOURCE must be only: APP or WEB");
+  return value;
+};
+
 const createAnemiaCheckup = asyncHandler(async (req, res) => {
-  const { PATIENT_ID } = req.body || {};
+  const {
+    PATIENT_ID,
+    CHECKUP_DATE,
+    HAEMOGLOBIN_COUNT,
+    ANY_OTHER_SYMPTOMS,
+    DATA_SOURCE,
+    CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE,
+  } = req.body || {};
+
   if (!PATIENT_ID) throw new HttpError(400, "PATIENT_ID is required");
 
   const payload = {
     ADDED_BY: req.user?.user_id ?? null,
     UPDATED_BY: req.user?.user_id ?? null,
+
     PATIENT_ID,
+    CHECKUP_DATE: CHECKUP_DATE ?? null,
+    HAEMOGLOBIN_COUNT: requireNumberOrNull(HAEMOGLOBIN_COUNT),
+    ANY_OTHER_SYMPTOMS: ANY_OTHER_SYMPTOMS ?? null,
+    DATA_SOURCE: validateDataSourceIfProvided(DATA_SOURCE),
+    CREATED_BY_LATITUDE: CREATED_BY_LATITUDE ?? null,
+    CREATED_BY_LONGITUDE: CREATED_BY_LONGITUDE ?? null,
   };
 
   const result = await insertAnemiaCheckup(req.app.locals.db, payload);
-  return res.status(201).json(successResponse("Anemia checkup created successfully", { affectedRows: result.affectedRows }, {}));
+  return res
+    .status(201)
+    .json(successResponse("Anemia checkup created successfully", { affectedRows: result.affectedRows }, {}));
 });
+
 
 const getAnemiaCheckups = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
@@ -75,18 +109,39 @@ const getAnemiaCheckupByIdCtrl = asyncHandler(async (req, res) => {
 });
 
 const updateAnemiaCheckupCtrl = asyncHandler(async (req, res) => {
-  const { PATIENT_ID } = req.body || {};
+  const {
+    PATIENT_ID,
+    CHECKUP_DATE,
+    HAEMOGLOBIN_COUNT,
+    ANY_OTHER_SYMPTOMS,
+    DATA_SOURCE,
+    CREATED_BY_LATITUDE,
+    CREATED_BY_LONGITUDE,
+  } = req.body || {};
+
   if (!PATIENT_ID) throw new HttpError(400, "PATIENT_ID is required");
 
-  const result = await updateAnemiaCheckup(req.app.locals.db, req.params.id, {
+  const payload = {
     UPDATED_BY: req.user?.user_id ?? null,
+
     PATIENT_ID,
-  });
+    CHECKUP_DATE: CHECKUP_DATE ?? null,
+    HAEMOGLOBIN_COUNT: requireNumberOrNull(HAEMOGLOBIN_COUNT),
+    ANY_OTHER_SYMPTOMS: ANY_OTHER_SYMPTOMS ?? null,
+    DATA_SOURCE: validateDataSourceIfProvided(DATA_SOURCE),
+    CREATED_BY_LATITUDE: CREATED_BY_LATITUDE ?? null,
+    CREATED_BY_LONGITUDE: CREATED_BY_LONGITUDE ?? null,
+  };
+
+  const result = await updateAnemiaCheckup(req.app.locals.db, req.params.id, payload);
 
   if (!result.affectedRows) throw new HttpError(404, "Anemia checkup not found");
 
-  return res.status(200).json(successResponse("Anemia checkup updated successfully", { affectedRows: result.affectedRows }, {}));
+  return res
+    .status(200)
+    .json(successResponse("Anemia checkup updated successfully", { affectedRows: result.affectedRows }, {}));
 });
+
 
 const deleteAnemiaCheckupCtrl = asyncHandler(async (req, res) => {
   const result = await softDeleteAnemiaCheckup(req.app.locals.db, req.params.id, req.user?.user_id);

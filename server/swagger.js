@@ -45,11 +45,15 @@ const swaggerDefinition = {
 const routesPath = path.resolve(__dirname, "routes").replace(/\\/g, "/");
 const apiGlob = `${routesPath}/**/*.routes.js`;
 
+// Also scan module-level routes (where some @swagger JSDoc blocks live)
+const modulesRoutesGlob = `${path.resolve(__dirname, "modules")}/**/*.routes.js`.replace(/\\/g, "/");
+
 const options = {
   definition: swaggerDefinition,
-  apis: [apiGlob],
+  apis: [apiGlob, modulesRoutesGlob],
   failOnErrors: true,
 };
 
 module.exports = swaggerJsdoc(options);
+
 
