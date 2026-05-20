@@ -10,7 +10,6 @@ const anemiaPerformaRoutes = require("./anemia-performa.routes");
 const sixWeekRoutes = require("./six-week-checkups.routes");
 const annualCheckupsRoutes = require("./annual-checkups.routes");
 
-const admCodeRoutes = require("./adm-code.routes");
 const admCodeItemRoutes = require("./adm-code-item.routes");
 
 router.use(authRoutes);
@@ -21,7 +20,6 @@ router.use(anemiaCheckupsRoutes);
 router.use(anemiaPerformaRoutes);
 router.use(sixWeekRoutes);
 router.use(annualCheckupsRoutes);
-router.use(admCodeRoutes);
 router.use(admCodeItemRoutes);
 
 module.exports = router;
