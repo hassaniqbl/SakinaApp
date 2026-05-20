@@ -1,37 +1,36 @@
-# TODO - ADM_CODE & ADM_CODE_ITEM CRUD + Lookup APIs
+# TODO - SC SIX WEEK & ANNUAL POSTNATAL CHECKUP APIs
 
-## Step 1: Create module folders/files
-- [ ] Create `server/modules/adm-code/`
-  - [ ] adm-code.model.js
-  - [ ] adm-code.service.js
-  - [ ] adm-code.controller.js
-  - [ ] adm-code.validation.js
-  - [ ] adm-code.routes.js
-- [ ] Create `server/modules/adm-code-item/`
-  - [ ] adm-code-item.model.js
-  - [ ] adm-code-item.service.js
-  - [ ] adm-code-item.controller.js
-  - [ ] adm-code-item.validation.js
-  - [ ] adm-code-item.routes.js
+## Phase 1: Validation Middleware
+- [ ] Add `server/modules/six-week-checkups/six-week-checkups.validation.js` with express-validator rules based on the provided schema.
+- [x] Add `server/modules/annual-checkups/annual-checkups.validation.js` with express-validator rules based on the provided schema.
 
-## Step 2: Wire routes into main router
-- [ ] Update `server/routes/index.js` to mount both new route modules.
 
-## Step 3: Implement SQL + business logic
-- [ ] ADM_CODE CRUD in model/service/controller
-- [ ] ADM_CODE_ITEM CRUD in model/service/controller
-- [ ] Lookup endpoints in adm-code routes/model as specified
-- [ ] Soft delete with `IS_DELETED` everywhere
-- [ ] Transaction-based cascade soft delete on `DELETE /adm-code/:id`
+## Phase 2: Routes wiring
+- [ ] Update `server/routes/six-week-checkups.routes.js` to use validation middleware + `validateRequest`.
+- [ ] Update `server/routes/annual-checkups.routes.js` to use validation middleware + `validateRequest`.
 
-## Step 4: Swagger documentation
-- [ ] Add swagger-jsdoc blocks for every new endpoint in new `*.routes.js` files.
+## Phase 3: Controller refactor
+- [ ] Update `server/modules/six-week-checkups/six-week-checkups.controller.js` to remove inline validation helpers and rely on validated body.
+- [ ] Update `server/modules/annual-checkups/annual-checkups.controller.js` to map full request body to model payload.
 
-## Step 5: Dummy insert SQL for testing
-- [ ] Add `server/adm-code-dummy-inserts.sql` with sample ADM_CODE + ADM_CODE_ITEM rows.
+## Phase 4: Model fixes for Annual (full schema CRUD)
+- [ ] Update `server/modules/annual-checkups/annual-checkups.model.js` to fully implement:
+  - [x] insert with full column list
 
-## Step 6: Sanity checks
-- [x] Run a quick node syntax check / start server
-- [ ] Verify swagger generation includes the new endpoints
+  - [x] getAll selects full record columns + pagination
 
+  - [x] update with full column list + DATE_UPDATED=NOW()
+
+- [x] soft delete sets IS_DELETED=1 + DATE_UPDATED=NOW()
+
+
+
+
+## Phase 5: Final verification
+- [ ] Ensure centralized error handling works for validation/model errors.
+- [ ] Smoke test CRUD endpoints:
+  - [ ] POST + GET by id
+  - [ ] GET all with pagination params
+  - [ ] PUT update
+  - [ ] DELETE soft delete then GET does not return the record
 

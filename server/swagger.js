@@ -21,12 +21,15 @@ const swaggerDefinition = {
     schemas: {
       PatientProfile: {
         type: "object",
-        required: ["PATIENT_NAME"],
+        // Required fields for POST /patients (per controller validation)
+        required: ["PATIENT_NAME", "CNIC_NUMBER", "PHONE_NUMBER", "AGE", "DATA_SOURCE"],
         properties: {
           PATIENT_ID: { type: "integer", example: 1 },
           PATIENT_NAME: { type: "string", example: "Ali" },
           CNIC_NUMBER: { type: "string", example: "35202-1234567-1" },
           PHONE_NUMBER: { type: "string", example: "03111222333" },
+          AGE: { type: "string", example: "45" },
+          DATA_SOURCE: { type: "string", example: "WEB" },
           LOCATION_ID: { type: "integer", example: 1 },
           IS_DELETED: { type: "boolean", example: false },
           ADDED_BY: { type: "integer", example: 1 },

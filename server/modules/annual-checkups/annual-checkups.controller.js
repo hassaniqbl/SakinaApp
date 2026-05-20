@@ -14,18 +14,39 @@ const {
 const ALLOWED_SORT = ["ANNUAL_CHECKUP_ID", "DELIVERY_ID", "DATE_CREATED", "DATE_UPDATED"];
 
 const createAnnualCheckup = asyncHandler(async (req, res) => {
-  const { DELIVERY_ID } = req.body || {};
-  if (!DELIVERY_ID) throw new HttpError(400, "DELIVERY_ID is required");
+  const body = req.body || {};
 
   const payload = {
     ADDED_BY: req.user?.user_id ?? null,
     UPDATED_BY: req.user?.user_id ?? null,
-    DELIVERY_ID,
+
+    DELIVERY_ID: body.DELIVERY_ID,
+    IS_PATIENT_ALIVE: body.IS_PATIENT_ALIVE,
+    PATIENT_DEATH_REASON: body.PATIENT_DEATH_REASON,
+    IS_PATIENT_HEALTHY: body.IS_PATIENT_HEALTHY,
+    PATIENT_HEALTH_MORE_DETAILS: body.PATIENT_HEALTH_MORE_DETAILS,
+
+    IS_BABY_ALIVE: body.IS_BABY_ALIVE,
+    BABY_DEATH_REASON: body.BABY_DEATH_REASON,
+    IS_BABY_HEALTHY: body.IS_BABY_HEALTHY,
+    BABY_HEALTH_MORE_DETAILS: body.BABY_HEALTH_MORE_DETAILS,
+
+    IS_BREAST_FEEDING: body.IS_BREAST_FEEDING,
+    BREAST_FEEDING_DURATION: body.BREAST_FEEDING_DURATION,
+    BIRTH_SPACING_PRACTICES: body.BIRTH_SPACING_PRACTICES,
+
+    DATA_SOURCE: body.DATA_SOURCE,
+
+    CREATED_BY_LATITUDE: body.CREATED_BY_LATITUDE ?? null,
+    CREATED_BY_LONGITUDE: body.CREATED_BY_LONGITUDE ?? null,
   };
 
   const result = await insertAnnualCheckup(req.app.locals.db, payload);
-  return res.status(201).json(successResponse("Annual checkup created successfully", { affectedRows: result.affectedRows }, {}));
+  return res
+    .status(201)
+    .json(successResponse("Record created successfully", { affectedRows: result.affectedRows }, {}));
 });
+
 
 const getAnnualCheckups = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
@@ -72,24 +93,50 @@ const getAnnualCheckupByIdCtrl = asyncHandler(async (req, res) => {
 });
 
 const updateAnnualCheckupCtrl = asyncHandler(async (req, res) => {
-  const { DELIVERY_ID } = req.body || {};
-  if (!DELIVERY_ID) throw new HttpError(400, "DELIVERY_ID is required");
+  const body = req.body || {};
 
-  const result = await updateAnnualCheckup(req.app.locals.db, req.params.id, {
+  const payload = {
     UPDATED_BY: req.user?.user_id ?? null,
-    DELIVERY_ID,
-  });
+
+    DELIVERY_ID: body.DELIVERY_ID,
+    IS_PATIENT_ALIVE: body.IS_PATIENT_ALIVE,
+    PATIENT_DEATH_REASON: body.PATIENT_DEATH_REASON,
+    IS_PATIENT_HEALTHY: body.IS_PATIENT_HEALTHY,
+    PATIENT_HEALTH_MORE_DETAILS: body.PATIENT_HEALTH_MORE_DETAILS,
+
+    IS_BABY_ALIVE: body.IS_BABY_ALIVE,
+    BABY_DEATH_REASON: body.BABY_DEATH_REASON,
+    IS_BABY_HEALTHY: body.IS_BABY_HEALTHY,
+    BABY_HEALTH_MORE_DETAILS: body.BABY_HEALTH_MORE_DETAILS,
+
+    IS_BREAST_FEEDING: body.IS_BREAST_FEEDING,
+    BREAST_FEEDING_DURATION: body.BREAST_FEEDING_DURATION,
+    BIRTH_SPACING_PRACTICES: body.BIRTH_SPACING_PRACTICES,
+
+    DATA_SOURCE: body.DATA_SOURCE,
+
+    CREATED_BY_LATITUDE: body.CREATED_BY_LATITUDE ?? null,
+    CREATED_BY_LONGITUDE: body.CREATED_BY_LONGITUDE ?? null,
+  };
+
+  const result = await updateAnnualCheckup(req.app.locals.db, req.params.id, payload);
 
   if (!result.affectedRows) throw new HttpError(404, "Annual checkup not found");
 
-  return res.status(200).json(successResponse("Annual checkup updated successfully", { affectedRows: result.affectedRows }, {}));
+  return res
+    .status(200)
+    .json(successResponse("Record updated successfully", { affectedRows: result.affectedRows }, {}));
 });
+
 
 const deleteAnnualCheckupCtrl = asyncHandler(async (req, res) => {
   const result = await softDeleteAnnualCheckup(req.app.locals.db, req.params.id, req.user?.user_id);
   if (!result.affectedRows) throw new HttpError(404, "Annual checkup not found");
-  return res.status(200).json(successResponse("Annual checkup deleted successfully", { affectedRows: result.affectedRows }, {}));
+  return res
+    .status(200)
+    .json(successResponse("Annual checkup deleted successfully", { affectedRows: result.affectedRows }, {}));
 });
+
 
 module.exports = {
   createAnnualCheckup,

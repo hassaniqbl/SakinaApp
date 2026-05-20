@@ -1,6 +1,9 @@
 const express = require("express");
 const { authMiddleware } = require("../middleware/auth.middleware");
+const { validateCreateSixWeekCheckup, validateUpdateSixWeekCheckup } = require("../modules/six-week-checkups/six-week-checkups.validation");
+const { validateRequest } = require("../middleware/validate.middleware");
 const { createSixWeekCheckup, getSixWeekCheckups, getSixWeekCheckupByIdCtrl, updateSixWeekCheckupCtrl, deleteSixWeekCheckupCtrl } = require("../modules/six-week-checkups/six-week-checkups.controller");
+
 
 const router = express.Router();
 
@@ -13,32 +16,44 @@ const router = express.Router();
 
 /**
  * @swagger
- * /six-week-checkups:
+ * /six-week-checkup:
  *   post:
  *     summary: Create six-week checkup
  *     tags: [Six Week Checkups]
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             example:
- *               PATIENT_ID: 1
- *               CHECKUP_DATE: "2024-01-15"
- *               MOTHER_HEALTH: "Good"
- *               BABY_HEALTH: "Good"
- *               BREASTFEEDING: "Yes"
- *               CONTRACEPTION: "None"
- *               NOTES: "Mother recovering well"
+ *           example:
+ *             DELIVERY_ID: 1
+ *             IS_PATIENT_ALIVE: true
+ *             PATIENT_DEATH_REASON: ""
+ *             IS_PATIENT_HEALTHY: true
+ *             PATIENT_HEALTH_MORE_DETAILS: ""
+ *             IS_BABY_ALIVE: true
+ *             BABY_DEATH_REASON: ""
+ *             IS_BABY_HEALTHY: true
+ *             BABY_HEALTH_MORE_DETAILS: ""
+ *             BREAST_FEEDING_DURATION: 1
+ *             IS_BABY_CORD_HEALTHY: true
+ *             BABY_CORD_CONDITION_MORE_DETAILS: ""
+ *             FOLLOWUP_DATE: "2026-05-19T10:00:00"
+ *             DATA_SOURCE: "WEB"
+ *             CREATED_BY_LATITUDE: 33.6844
+ *             CREATED_BY_LONGITUDE: 73.0479
+ *             ADDED_BY: 1
+ *             UPDATED_BY: 1
  *     responses:
  *       201:
  *         description: Created
  */
-router.post("/six-week-checkups", authMiddleware, createSixWeekCheckup);
+router.post("/six-week-checkup", authMiddleware, validateCreateSixWeekCheckup, validateRequest, createSixWeekCheckup);
 
 /**
  * @swagger
- * /six-week-checkups:
+ * /six-week-checkup:
  *   get:
  *     summary: Get six-week checkups list
  *     tags: [Six Week Checkups]
@@ -46,11 +61,11 @@ router.post("/six-week-checkups", authMiddleware, createSixWeekCheckup);
  *       200:
  *         description: List returned
  */
-router.get("/six-week-checkups", authMiddleware, getSixWeekCheckups);
+router.get("/six-week-checkup", authMiddleware, getSixWeekCheckups);
 
 /**
  * @swagger
- * /six-week-checkups/{id}:
+ * /six-week-checkup/{id}:
  *   get:
  *     summary: Get six-week checkup by id
  *     tags: [Six Week Checkups]
@@ -64,11 +79,11 @@ router.get("/six-week-checkups", authMiddleware, getSixWeekCheckups);
  *       200:
  *         description: Checkup object
  */
-router.get("/six-week-checkups/:id", authMiddleware, getSixWeekCheckupByIdCtrl);
+router.get("/six-week-checkup/:id", authMiddleware, getSixWeekCheckupByIdCtrl);
 
 /**
  * @swagger
- * /six-week-checkups/{id}:
+ * /six-week-checkup/{id}:
  *   put:
  *     summary: Update six-week checkup
  *     tags: [Six Week Checkups]
@@ -79,19 +94,40 @@ router.get("/six-week-checkups/:id", authMiddleware, getSixWeekCheckupByIdCtrl);
  *         schema:
  *           type: string
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *           example:
+ *             DELIVERY_ID: 1
+ *             IS_PATIENT_ALIVE: true
+ *             PATIENT_DEATH_REASON: ""
+ *             IS_PATIENT_HEALTHY: true
+ *             PATIENT_HEALTH_MORE_DETAILS: ""
+ *             IS_BABY_ALIVE: true
+ *             BABY_DEATH_REASON: ""
+ *             IS_BABY_HEALTHY: true
+ *             BABY_HEALTH_MORE_DETAILS: ""
+ *             BREAST_FEEDING_DURATION: 1
+ *             IS_BABY_CORD_HEALTHY: true
+ *             BABY_CORD_CONDITION_MORE_DETAILS: ""
+ *             FOLLOWUP_DATE: "2026-05-19T10:00:00"
+ *             DATA_SOURCE: "WEB"
+ *             CREATED_BY_LATITUDE: 33.6844
+ *             CREATED_BY_LONGITUDE: 73.0479
+ *             ADDED_BY: 1
+ *             UPDATED_BY: 1
  *     responses:
  *       200:
  *         description: Updated
  */
-router.put("/six-week-checkups/:id", authMiddleware, updateSixWeekCheckupCtrl);
+router.put("/six-week-checkup/:id", authMiddleware, validateUpdateSixWeekCheckup, validateRequest, updateSixWeekCheckupCtrl);
+
 
 /**
  * @swagger
- * /six-week-checkups/{id}:
+ * /six-week-checkup/{id}:
  *   delete:
  *     summary: Delete six-week checkup
  *     tags: [Six Week Checkups]
@@ -105,7 +141,7 @@ router.put("/six-week-checkups/:id", authMiddleware, updateSixWeekCheckupCtrl);
  *       200:
  *         description: Deleted
  */
-router.delete("/six-week-checkups/:id", authMiddleware, deleteSixWeekCheckupCtrl);
+router.delete("/six-week-checkup/:id", authMiddleware, deleteSixWeekCheckupCtrl);
 
 module.exports = router;
 

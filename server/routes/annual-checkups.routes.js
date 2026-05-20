@@ -1,6 +1,18 @@
 const express = require("express");
 const { authMiddleware } = require("../middleware/auth.middleware");
-const { createAnnualCheckup, getAnnualCheckups, getAnnualCheckupByIdCtrl, updateAnnualCheckupCtrl, deleteAnnualCheckupCtrl } = require("../modules/annual-checkups/annual-checkups.controller");
+const {
+  validateCreateAnnualCheckup,
+  validateUpdateAnnualCheckup,
+} = require("../modules/annual-checkups/annual-checkups.validation");
+const { validateRequest } = require("../middleware/validate.middleware");
+
+const {
+  createAnnualCheckup,
+  getAnnualCheckups,
+  getAnnualCheckupByIdCtrl,
+  updateAnnualCheckupCtrl,
+  deleteAnnualCheckupCtrl,
+} = require("../modules/annual-checkups/annual-checkups.controller");
 
 const router = express.Router();
 
@@ -13,33 +25,47 @@ const router = express.Router();
 
 /**
  * @swagger
- * /annual-checkups:
+ * /annual-checkup:
  *   post:
  *     summary: Create annual checkup
  *     tags: [Annual Checkups]
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             example:
- *               PATIENT_ID: 1
- *               CHECKUP_DATE: "2024-01-15"
- *               GENERAL_HEALTH: "Good"
- *               BLOOD_PRESSURE: "120/80"
- *               WEIGHT: 65
- *               HEIGHT: 165
- *               BMI: 23.9
- *               NOTES: "Annual checkup completed"
+ *           example:
+ *             DELIVERY_ID: 1
+ *             IS_PATIENT_ALIVE: true
+ *             PATIENT_DEATH_REASON: ""
+ *             IS_PATIENT_HEALTHY: true
+ *             PATIENT_HEALTH_MORE_DETAILS: ""
+ *             IS_BABY_ALIVE: true
+ *             BABY_DEATH_REASON: ""
+ *             IS_BABY_HEALTHY: true
+ *             BABY_HEALTH_MORE_DETAILS: ""
+ *             IS_BREAST_FEEDING: true
+ *             BREAST_FEEDING_DURATION: 1
+ *             BIRTH_SPACING_PRACTICES: 1
+ *             DATA_SOURCE: "WEB"
+ *             CREATED_BY_LATITUDE: 33.6844
+ *             CREATED_BY_LONGITUDE: 73.0479
  *     responses:
  *       201:
  *         description: Created
  */
-router.post("/annual-checkups", authMiddleware, createAnnualCheckup);
+router.post(
+  "/annual-checkup",
+  authMiddleware,
+  validateCreateAnnualCheckup,
+  validateRequest,
+  createAnnualCheckup
+);
 
 /**
  * @swagger
- * /annual-checkups:
+ * /annual-checkup:
  *   get:
  *     summary: Get annual checkups list
  *     tags: [Annual Checkups]
@@ -47,11 +73,11 @@ router.post("/annual-checkups", authMiddleware, createAnnualCheckup);
  *       200:
  *         description: List returned
  */
-router.get("/annual-checkups", authMiddleware, getAnnualCheckups);
+router.get("/annual-checkup", authMiddleware, getAnnualCheckups);
 
 /**
  * @swagger
- * /annual-checkups/{id}:
+ * /annual-checkup/{id}:
  *   get:
  *     summary: Get annual checkup by id
  *     tags: [Annual Checkups]
@@ -65,11 +91,11 @@ router.get("/annual-checkups", authMiddleware, getAnnualCheckups);
  *       200:
  *         description: Checkup object
  */
-router.get("/annual-checkups/:id", authMiddleware, getAnnualCheckupByIdCtrl);
+router.get("/annual-checkup/:id", authMiddleware, getAnnualCheckupByIdCtrl);
 
 /**
  * @swagger
- * /annual-checkups/{id}:
+ * /annual-checkup/{id}:
  *   put:
  *     summary: Update annual checkup
  *     tags: [Annual Checkups]
@@ -80,19 +106,42 @@ router.get("/annual-checkups/:id", authMiddleware, getAnnualCheckupByIdCtrl);
  *         schema:
  *           type: string
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *           example:
+ *             DELIVERY_ID: 1
+ *             IS_PATIENT_ALIVE: true
+ *             PATIENT_DEATH_REASON: ""
+ *             IS_PATIENT_HEALTHY: true
+ *             PATIENT_HEALTH_MORE_DETAILS: ""
+ *             IS_BABY_ALIVE: true
+ *             BABY_DEATH_REASON: ""
+ *             IS_BABY_HEALTHY: true
+ *             BABY_HEALTH_MORE_DETAILS: ""
+ *             IS_BREAST_FEEDING: true
+ *             BREAST_FEEDING_DURATION: 1
+ *             BIRTH_SPACING_PRACTICES: 1
+ *             DATA_SOURCE: "WEB"
+ *             CREATED_BY_LATITUDE: 33.6844
+ *             CREATED_BY_LONGITUDE: 73.0479
  *     responses:
  *       200:
  *         description: Updated
  */
-router.put("/annual-checkups/:id", authMiddleware, updateAnnualCheckupCtrl);
+router.put(
+  "/annual-checkup/:id",
+  authMiddleware,
+  validateUpdateAnnualCheckup,
+  validateRequest,
+  updateAnnualCheckupCtrl
+);
 
 /**
  * @swagger
- * /annual-checkups/{id}:
+ * /annual-checkup/{id}:
  *   delete:
  *     summary: Delete annual checkup
  *     tags: [Annual Checkups]
@@ -106,7 +155,8 @@ router.put("/annual-checkups/:id", authMiddleware, updateAnnualCheckupCtrl);
  *       200:
  *         description: Deleted
  */
-router.delete("/annual-checkups/:id", authMiddleware, deleteAnnualCheckupCtrl);
+router.delete("/annual-checkup/:id", authMiddleware, deleteAnnualCheckupCtrl);
 
 module.exports = router;
+
 

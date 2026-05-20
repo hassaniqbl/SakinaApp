@@ -59,12 +59,17 @@ const requireNumber = (value, fieldName) => {
 const createPatient = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
 
+  if (!req.body || typeof req.body !== "object") {
+    throw new HttpError(400, "Request body must be a valid JSON object");
+  }
+
   const {
     PATIENT_NAME,
     CNIC_NUMBER,
     PHONE_NUMBER,
     AGE,
     DATA_SOURCE,
+
     // optional fields
     HUSBAND_NAME,
     ADDRESS_LINE1,
@@ -84,16 +89,29 @@ const createPatient = asyncHandler(async (req, res) => {
     ANTENATAL_VISITS,
     CREATED_BY_LATITUDE,
     CREATED_BY_LONGITUDE,
-    // DO NOT accept IS_DELETED/REGISTRATION_DATE from client per spec
-  } = req.body || {};
+    // DO NOT accept IS_DELETED/REGISTRATION_DATE/DATE_CREATED/DATE_UPDATED from client per spec
+  } = req.body;
 
-  if (!PATIENT_NAME) throw new HttpError(400, "PATIENT_NAME is required");
-  if (!CNIC_NUMBER) throw new HttpError(400, "CNIC_NUMBER is required");
-  if (!PHONE_NUMBER) throw new HttpError(400, "PHONE_NUMBER is required");
+  // Required fields for POST /patients (kept in sync with controller + model insert mapping)
+  const requiredFields = [
+    "PATIENT_NAME",
+    "CNIC_NUMBER",
+    "PHONE_NUMBER",
+    "AGE",
+    "DATA_SOURCE",
+  ];
+
+  const missing = requiredFields.filter((field) => {
+    const v = req.body[field];
+    return v === undefined || v === null || v === "";
+  });
+
+  if (missing.length) {
+    throw new HttpError(400, `Missing required fields: ${missing.join(", ")}`);
+  }
 
   const age = requireNumber(AGE, "AGE");
 
-  if (!DATA_SOURCE) throw new HttpError(400, "DATA_SOURCE is required");
   if (!ALLOWED_DATA_SOURCE.has(DATA_SOURCE)) {
     throw new HttpError(400, "DATA_SOURCE must be only: APP or WEB");
   }
