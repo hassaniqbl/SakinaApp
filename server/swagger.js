@@ -1,5 +1,6 @@
 const path = require("path");
 const swaggerJsdoc = require("swagger-jsdoc");
+require("dotenv").config();
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -8,7 +9,11 @@ const swaggerDefinition = {
     version: "1.0.0",
     description: "API documentation for SakinaCare backend",
   },
-  servers: [{ url: "http://localhost:5000" }],
+  servers: [
+    {
+      url: process.env.SERVER_URL || `http://localhost:${process.env.PORT || 5000}`,
+    },
+  ],
   components: {
     // Removed bearerAuth scheme for testing (prevents Swagger UI “Authorize” button)
     // securitySchemes: {

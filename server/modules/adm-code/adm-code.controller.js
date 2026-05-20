@@ -1,106 +1,87 @@
 const asyncHandler = require("../../config/asyncHandler");
 const { HttpError } = require("../../utils/httpError");
-const { successResponse } = require("../../utils/apiResponse");
-const { getPagination, normalizeSort, buildSearchClause } = require("../../utils/queryBuilder");
-
-const {
-  getAllAdmCodes,
-  getAdmCodeById,
-  getAllCodesWithItems,
-  getCodeItemsByCodeName,
-  getCodeItemsByCodeId,
-  getDropdownCodes,
-} = require("./adm-code.model");
-
+const { errorResponse } = require("../../utils/apiResponse");
 
 const {
   createAdmCodeTx,
+  getAdmCodes,
+  getAdmCodeById,
   updateAdmCodeTx,
-  softDeleteAdmCodeCascadeTx,
+  softDeleteAdmCodeTx,
 } = require("./adm-code.service");
 
-const ALLOWED_SORT = ["CODE_ID", "CODE_NAME", "DATE_CREATED", "DATE_UPDATED"];
-
-
+const buildSuccess = (message, data) => ({ success: true, message, data });
+const buildError = (message, error) => ({ success: false, message, error: error || {} });
 
 const createAdmCodeCtrl = asyncHandler(async (req, res) => {
-  const db = req.app.locals.db;
+  try {
+    const db = req.app.locals.db;
 
-  const { code_name, code_description, added_by } = req.body || {};
 
-  if (!code_name) throw new HttpError(400, "code_name is required");
+    const { CODE_NAME, CODE_DESCRIPTION, ADDED_BY } = req.body || {};
 
-  const payload = {
-    code_name,
-    code_description: code_description ?? null,
-    added_by: added_by ?? null,
-    updated_by: req.user?.user_id ?? added_by ?? null,
-  };
 
-  const result = await createAdmCodeTx(db, payload);
 
-  return res
-    .status(201)
-    .json(successResponse("Code created successfully", { affectedRows: result.affectedRows }, {}));
+
+    if (!CODE_NAME) throw new HttpError(400, "CODE_NAME is required");
+
+    const payload = {
+      CODE_NAME,
+      CODE_DESCRIPTION: CODE_DESCRIPTION ?? null,
+      ADDED_BY: ADDED_BY ?? null,
+      UPDATED_BY: req.user?.user_id ?? ADDED_BY ?? null,
+    };
+
+    const result = await createAdmCodeTx(db, payload);
+
+    return res.status(201).json(
+      buildSuccess("ADM_CODE created successfully", result.row)
+    );
+  } catch (err) {
+    // asyncHandler will catch thrown errors, but keep consistent structure
+    throw err;
+  }
 });
 
 const getAdmCodesCtrl = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
-  const { page, limit, offset } = getPagination(req.query);
 
-  const { sortBy, sortOrder } = normalizeSort(req.query, ALLOWED_SORT, "DATE_CREATED");
+  const rows = await getAdmCodes(db);
 
-  const searchClauseObj = buildSearchClause({
-    searchFields: ["c.CODE_NAME"],
-    searchQuery: req.query.search,
-  });
-
-  const { rows, total } = await getAllAdmCodes(
-    db,
-    { page, limit, offset },
-    {
-      searchClause: searchClauseObj.clause ? `(${searchClauseObj.clause})` : "",
-      searchParams: searchClauseObj.params,
-    },
-    { sortBy, sortOrder }
-  );
-
-  return res.status(200).json(
-    successResponse("Data fetched successfully", rows, {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit) || 0,
-    })
-  );
+  return res
+    .status(200)
+    .json(buildSuccess("ADM_CODE fetched successfully", rows));
 });
 
 const getAdmCodeByIdCtrl = asyncHandler(async (req, res) => {
-  const row = await getAdmCodeById(req.app.locals.db, req.params.id);
+  const db = req.app.locals.db;
+  const row = await getAdmCodeById(db, req.params.id);
+
   if (!row) throw new HttpError(404, "ADM_CODE not found");
-  return res.status(200).json(successResponse("Data fetched successfully", row, {}));
+
+  return res
+    .status(200)
+    .json(buildSuccess("ADM_CODE fetched successfully", row));
 });
 
 const updateAdmCodeCtrl = asyncHandler(async (req, res) => {
   const db = req.app.locals.db;
   const { id } = req.params;
-  const { code_name, code_description, updated_by, added_by } = req.body || {};
-
-  if (!code_name) throw new HttpError(400, "code_name is required");
+  const { CODE_NAME, CODE_DESCRIPTION, UPDATED_BY } = req.body || {};
 
   const payload = {
-    code_name,
-    code_description: code_description ?? null,
-    updated_by: req.user?.user_id ?? updated_by ?? added_by ?? null,
+    CODE_NAME,
+    CODE_DESCRIPTION: CODE_DESCRIPTION ?? null,
+    UPDATED_BY: UPDATED_BY ?? req.user?.user_id ?? null,
   };
 
   const result = await updateAdmCodeTx(db, id, payload);
 
-  if (!result.affectedRows) throw new HttpError(404, "ADM_CODE not found");
+  if (!result.affectedRows || !result.row) throw new HttpError(404, "ADM_CODE not found");
 
   return res
     .status(200)
-    .json(successResponse("Code updated successfully", { affectedRows: result.affectedRows }, {}));
+    .json(buildSuccess("ADM_CODE updated successfully", result.row));
 });
 
 const deleteAdmCodeCtrl = asyncHandler(async (req, res) => {
@@ -108,45 +89,13 @@ const deleteAdmCodeCtrl = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updatedBy = req.user?.user_id ?? null;
 
-  const result = await softDeleteAdmCodeCascadeTx(db, id, updatedBy);
+  const result = await softDeleteAdmCodeTx(db, id, updatedBy);
 
-  if (!result.codeAffectedRows) throw new HttpError(404, "ADM_CODE not found");
+  if (!result.affectedRows) throw new HttpError(404, "ADM_CODE not found");
 
   return res
     .status(200)
-    .json(
-      successResponse(
-        "Code deleted successfully",
-        result,
-        {}
-      )
-    );
-});
-
-const getWithItemsCtrl = asyncHandler(async (req, res) => {
-  const rows = await getAllCodesWithItems(req.app.locals.db);
-  return res.status(200).json(successResponse("Data fetched successfully", rows, {}));
-});
-
-const getByNameCtrl = asyncHandler(async (req, res) => {
-  const items = await getCodeItemsByCodeName(req.app.locals.db, req.params.codeName);
-  return res
-    .status(200)
-    .json(successResponse("Data fetched successfully", items, {}));
-});
-
-
-
-
-const getItemsByCodeIdCtrl = asyncHandler(async (req, res) => {
-  const rows = await getCodeItemsByCodeId(req.app.locals.db, req.params.codeId);
-  return res.status(200).json(successResponse("Data fetched successfully", rows, {}));
-});
-
-
-const getDropdownCtrl = asyncHandler(async (req, res) => {
-  const rows = await getDropdownCodes(req.app.locals.db);
-  return res.status(200).json(successResponse("Data fetched successfully", rows, {}));
+    .json(buildSuccess("ADM_CODE deleted successfully", result));
 });
 
 module.exports = {
@@ -155,9 +104,5 @@ module.exports = {
   getAdmCodeByIdCtrl,
   updateAdmCodeCtrl,
   deleteAdmCodeCtrl,
-  getWithItemsCtrl,
-  getByNameCtrl,
-  getItemsByCodeIdCtrl,
-  getDropdownCtrl,
 };
 

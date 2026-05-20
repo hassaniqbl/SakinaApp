@@ -2,7 +2,10 @@ const express = require("express");
 
 const router = express.Router();
 
-// ADM_CODE API has been intentionally removed.
+const admCodeRoutes = require("../modules/adm-code/adm-code.routes");
+
+router.use("/", admCodeRoutes);
 
 module.exports = router;
+
 

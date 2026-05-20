@@ -5,14 +5,24 @@ require("dotenv").config();
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
-
-const patientsRoutes = require("./routes/patients.routes");
-const usersRoutes = require("./routes/users.routes");
+const apiRoutes = require("./routes");
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    return callback(null, true);
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: false,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -23,7 +33,7 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.log(err);
+    console.error("MySQL connection error:", err);
   } else {
     console.log("MySQL Connected");
   }
@@ -36,21 +46,37 @@ app.get("/", (req, res) => {
   res.send("Backend Running");
 });
 
-// Swagger
+// Serve the generated swagger JSON explicitly so the UI always fetches the
+// up-to-date spec.
+app.get('/api-docs/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.json(swaggerSpec);
+});
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
-app.use(patientsRoutes);
-app.use(usersRoutes);
+app.use("/", apiRoutes);
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err);
-  return res.status(500).json({ message: "Internal Server Error" });
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    success: false,
+    message: "Something went wrong",
+    error: err?.message,
+  });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 
