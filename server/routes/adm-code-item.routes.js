@@ -1,6 +1,8 @@
 const express = require("express");
-const { authMiddleware } = require("../../middleware/auth.middleware");
-const { validateRequest } = require("../../middleware/validate.js");
+const { authMiddleware } = require("../middleware/auth.middleware");
+const { validateRequest } = require("../middleware/validate.middleware");
+
+
 
 const {
   getItemsCtrl,
@@ -9,7 +11,7 @@ const {
   updateCtrl,
   deleteCtrl,
   dropdownItemsCtrl,
-} = require("./adm-code-item.controller");
+} = require("../modules/adm-code-item/adm-code-item.controller");
 
 const {
   validateCreateAdmCodeItem,
@@ -17,7 +19,7 @@ const {
   validateIdParam,
   validateListQuery,
   validateDropdownCodeId,
-} = require("./adm-code-item.validation");
+} = require("../modules/adm-code-item/adm-code-item.validation");
 
 const router = express.Router();
 

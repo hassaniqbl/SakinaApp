@@ -9,13 +9,13 @@ const db = createDbConnection();
 
 app.locals.db = db;
 
-// keep original connection behavior for compatibility
-
-
-db.getConnection((err) => {
+// Attempt a single connection check using async/await with the promise pool
+// Check DB connectivity using callback-style getConnection on non-promise pool
+db.getConnection((err, conn) => {
   if (err) {
     console.error("MySQL connection error:", err);
   } else {
+    if (conn && typeof conn.release === "function") conn.release();
     console.log("MySQL Connected");
   }
 });

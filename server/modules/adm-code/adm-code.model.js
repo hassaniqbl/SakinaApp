@@ -132,7 +132,7 @@ const getAllCodesWithItems = async (db) => {
     LEFT JOIN ADM_CODE_ITEM ci
       ON ci.CODE_ID = c.CODE_ID AND ci.IS_DELETED = b'0'
     WHERE c.IS_DELETED = b'0'
-    ORDER BY c.DATE_CREATED DESC, ci.DISPLAY_ORDER ASC, ci.CODE_ITEM_ID ASC
+    ORDER BY c.DATE_CREATED DESC, ci.CODE_ITEM_ID ASC
   `;
 
   const [rows] = await db.promise().query(sql);
@@ -163,8 +163,9 @@ const getCodeItemsByCodeName = async (db, codeName) => {
       AND ci.IS_DELETED = b'0'
     WHERE c.CODE_NAME = ?
       AND c.IS_DELETED = b'0'
-    ORDER BY ci.DISPLAY_ORDER ASC, ci.CODE_ITEM_ID ASC
+    ORDER BY ci.CODE_ITEM_ID ASC
   `;
+
 
   const [rows] = await db.promise().query(sql, [codeName]);
   return rows.map((r) => ({

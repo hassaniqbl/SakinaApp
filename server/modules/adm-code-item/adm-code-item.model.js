@@ -17,7 +17,6 @@ const getAllAdmCodeItems = async (
       ci.CODE_ID,
       ci.ITEM_NAME,
       ci.ITEM_VALUE,
-      ci.DISPLAY_ORDER,
       ci.IS_DELETED,
       ci.ADDED_BY,
       ci.UPDATED_BY,
@@ -51,7 +50,6 @@ const getAdmCodeItemById = async (db, codeItemId) => {
         ci.CODE_ID,
         ci.ITEM_NAME,
         ci.ITEM_VALUE,
-        ci.DISPLAY_ORDER,
         ci.IS_DELETED,
         ci.ADDED_BY,
         ci.UPDATED_BY,
@@ -70,23 +68,22 @@ const insertAdmCodeItem = async (db, payload) => {
       CODE_ID,
       ITEM_NAME,
       ITEM_VALUE,
-      DISPLAY_ORDER,
       IS_DELETED,
       ADDED_BY,
       UPDATED_BY,
       DATE_CREATED,
       DATE_UPDATED
-    ) VALUES (?, ?, ?, ?, b'0', ?, ?, NOW(), NOW())
+    ) VALUES (?, ?, ?, b'0', ?, ?, NOW(), NOW())
   `;
 
   const params = [
     payload.code_id,
     payload.item_name,
     payload.item_value,
-    payload.display_order ?? null,
     payload.added_by ?? null,
     payload.updated_by ?? null,
   ];
+
   const [result] = await db.promise().execute(sql, params);
   return result;
 };
@@ -98,7 +95,6 @@ const updateAdmCodeItem = async (db, codeItemId, payload) => {
       CODE_ID = ?,
       ITEM_NAME = ?,
       ITEM_VALUE = ?,
-      DISPLAY_ORDER = ?,
       UPDATED_BY = ?,
       DATE_UPDATED = NOW()
     WHERE CODE_ITEM_ID = ? AND IS_DELETED = b'0'
@@ -108,7 +104,6 @@ const updateAdmCodeItem = async (db, codeItemId, payload) => {
     payload.code_id,
     payload.item_name,
     payload.item_value,
-    payload.display_order ?? null,
     payload.updated_by ?? null,
     codeItemId,
   ];
@@ -153,7 +148,7 @@ const getDropdownItemsByCodeId = async (db, codeId) => {
     SELECT ITEM_NAME, CODE_ITEM_ID
     FROM ADM_CODE_ITEM
     WHERE CODE_ID = ? AND IS_DELETED = b'0'
-    ORDER BY DISPLAY_ORDER ASC, CODE_ITEM_ID ASC
+    ORDER BY CODE_ITEM_ID ASC
   `;
   const [rows] = await db.promise().query(sql, [codeId]);
   return rows.map((r) => ({ label: r.ITEM_NAME, value: r.CODE_ITEM_ID }));

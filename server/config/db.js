@@ -1,7 +1,7 @@
 const mysql = require("mysql2");
 
 function createDbConnection() {
-  // Use pool for concurrency + stable performance
+  // Use promise-wrapped pool so caller can use async/await consistently
   const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

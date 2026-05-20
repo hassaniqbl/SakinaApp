@@ -1,10 +1,9 @@
 const express = require("express");
+const { validateRequest } = require("../middleware/validate.middleware");
 
-const { authMiddleware } = require("../../middleware/auth.middleware");
-const { validateRequest } = require("../../middleware/validate.js");
+const { authMiddleware } = require("../middleware/auth.middleware");
 
-const {
-  createAdmCodeCtrl,
+const {  createAdmCodeCtrl,
   getAdmCodesCtrl,
   getAdmCodeByIdCtrl,
   updateAdmCodeCtrl,
@@ -12,8 +11,8 @@ const {
   getWithItemsCtrl,
   getByNameCtrl,
   getItemsByCodeIdCtrl,
-  getDropdownCtrl,
-} = require("./adm-code.controller");
+  getDropdownCtrl
+} = require("../modules/adm-code/adm-code.controller");
 
 const {
   validateCreateAdmCode,
@@ -21,9 +20,9 @@ const {
   validateIdParam,
   validateListQuery,
   validateByName,
-} = require("./adm-code.validation");
+} = require("../modules/adm-code/adm-code.validation");
 
-const { validateDropdownCodeId } = require("../adm-code-item/adm-code-item.validation");
+const { validateDropdownCodeId } = require("../modules/adm-code-item/adm-code-item.validation");
 
 
 const router = express.Router();
@@ -55,7 +54,7 @@ const router = express.Router();
  *       201:
  *         description: Code created
  */
-router.post("/adm-code", authMiddleware, validateCreateAdmCode, validateRequest, createAdmCodeCtrl);
+router.post("/adm-code", authMiddleware, validateCreateAdmCode, createAdmCodeCtrl);
 
 /**
  * @swagger
@@ -77,7 +76,7 @@ router.post("/adm-code", authMiddleware, validateCreateAdmCode, validateRequest,
  *       200:
  *         description: List fetched
  */
-router.get("/adm-code", authMiddleware, validateListQuery, validateRequest, getAdmCodesCtrl);
+router.get("/adm-code", authMiddleware, validateListQuery, getAdmCodesCtrl);
 
 /**
  * @swagger
@@ -96,7 +95,7 @@ router.get("/adm-code", authMiddleware, validateListQuery, validateRequest, getA
  *       404:
  *         description: Not found
  */
-router.get("/adm-code/:id", authMiddleware, validateIdParam, validateRequest, getAdmCodeByIdCtrl);
+router.get("/adm-code/:id", authMiddleware, validateIdParam, getAdmCodeByIdCtrl);
 
 /**
  * @swagger
@@ -123,7 +122,7 @@ router.get("/adm-code/:id", authMiddleware, validateIdParam, validateRequest, ge
  *       200:
  *         description: Updated
  */
-router.put("/adm-code/:id", authMiddleware, validateUpdateAdmCode, validateRequest, updateAdmCodeCtrl);
+router.put("/adm-code/:id", authMiddleware, validateUpdateAdmCode, updateAdmCodeCtrl);
 
 /**
  * @swagger
@@ -140,7 +139,7 @@ router.put("/adm-code/:id", authMiddleware, validateUpdateAdmCode, validateReque
  *       200:
  *         description: Deleted
  */
-router.delete("/adm-code/:id", authMiddleware, validateIdParam, validateRequest, deleteAdmCodeCtrl);
+router.delete("/adm-code/:id", authMiddleware, validateIdParam, deleteAdmCodeCtrl);
 
 /**
  * @swagger
@@ -169,7 +168,7 @@ router.get("/adm-code/with-items", authMiddleware, getWithItemsCtrl);
  *       200:
  *         description: Items fetched
  */
-router.get("/adm-code/by-name/:codeName", authMiddleware, validateByName, validateRequest, getByNameCtrl);
+router.get("/adm-code/by-name/:codeName", authMiddleware, validateByName,  getByNameCtrl);
 
 /**
  * @swagger
@@ -186,7 +185,7 @@ router.get("/adm-code/by-name/:codeName", authMiddleware, validateByName, valida
  *       200:
  *         description: Items fetched
  */
-router.get("/adm-code/items/:codeId", authMiddleware, validateDropdownCodeId, validateRequest, getItemsByCodeIdCtrl);
+router.get("/adm-code/items/:codeId", authMiddleware, validateDropdownCodeId, getItemsByCodeIdCtrl);
 
 
 /**

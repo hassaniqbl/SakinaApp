@@ -20,12 +20,13 @@ const createAdmCode = async (db, payload) => {
 };
 
 const createAdmCodeTx = async (dbPool, payload) => {
-  // Model insert does not require transaction, but we keep for consistency.
-  const conn = await dbPool.getConnection();
+  let connection;
   try {
-    await conn.beginTransaction();
+    connection = await dbPool.getConnection();
+    await connection.beginTransaction();
 
-    await ensureCodeNameUnique(conn, payload.code_name, null);
+
+    await ensureCodeNameUnique(connection, payload.code_name, null);
 
     const sql = `
       INSERT INTO ADM_CODE (
@@ -46,24 +47,26 @@ const createAdmCodeTx = async (dbPool, payload) => {
       payload.updated_by ?? null,
     ];
 
-    const [result] = await conn.promise().execute(sql, params);
+    const [result] = await connection.execute(sql, params);
 
-    await conn.commit();
+    await connection.commit();
     return result;
   } catch (err) {
-    await conn.rollback();
+    console.error(err);
+    if (connection) await connection.rollback();
     throw err;
   } finally {
-    conn.release();
+    if (connection) connection.release();
   }
 };
 
 const updateAdmCodeTx = async (dbPool, codeId, payload) => {
-  const conn = await dbPool.getConnection();
+  let connection;
   try {
-    await conn.beginTransaction();
+    connection = await dbPool.promise().getConnection();
+    await connection.beginTransaction();
 
-    await ensureCodeNameUnique(conn, payload.code_name, codeId);
+    await ensureCodeNameUnique(connection, payload.code_name, codeId);
 
     const sql = `
       UPDATE ADM_CODE
@@ -82,49 +85,48 @@ const updateAdmCodeTx = async (dbPool, codeId, payload) => {
       codeId,
     ];
 
-    const [result] = await conn.promise().execute(sql, params);
+    const [result] = await connection.execute(sql, params);
 
-    await conn.commit();
+    await connection.commit();
     return result;
   } catch (err) {
-    await conn.rollback();
+    console.error(err);
+    if (connection) await connection.rollback();
     throw err;
   } finally {
-    conn.release();
+    if (connection) connection.release();
   }
 };
 
 const softDeleteAdmCodeCascadeTx = async (dbPool, codeId, updatedBy, admCodeModel, admCodeItemModel) => {
-  const conn = await dbPool.getConnection();
+  let connection;
   try {
-    await conn.beginTransaction();
+    connection = await dbPool.promise().getConnection();
+    await connection.beginTransaction();
 
     // Mark code + items as deleted
-    const [codeRes] = await conn
-      .promise()
-      .execute(
-        `UPDATE ADM_CODE
-         SET IS_DELETED = b'1', UPDATED_BY = ?, DATE_UPDATED = NOW()
-         WHERE CODE_ID = ? AND IS_DELETED = b'0'`,
-        [updatedBy ?? null, codeId]
-      );
+    const [codeRes] = await connection.execute(
+      `UPDATE ADM_CODE
+       SET IS_DELETED = b'1', UPDATED_BY = ?, DATE_UPDATED = NOW()
+       WHERE CODE_ID = ? AND IS_DELETED = b'0'`,
+      [updatedBy ?? null, codeId]
+    );
 
-    const [itemsRes] = await conn
-      .promise()
-      .execute(
-        `UPDATE ADM_CODE_ITEM
-         SET IS_DELETED = b'1', UPDATED_BY = ?, DATE_UPDATED = NOW()
-         WHERE CODE_ID = ? AND IS_DELETED = b'0'`,
-        [updatedBy ?? null, codeId]
-      );
+    const [itemsRes] = await connection.execute(
+      `UPDATE ADM_CODE_ITEM
+       SET IS_DELETED = b'1', UPDATED_BY = ?, DATE_UPDATED = NOW()
+       WHERE CODE_ID = ? AND IS_DELETED = b'0'`,
+      [updatedBy ?? null, codeId]
+    );
 
-    await conn.commit();
+    await connection.commit();
     return { codeAffectedRows: codeRes.affectedRows, itemsAffectedRows: itemsRes.affectedRows };
   } catch (err) {
-    await conn.rollback();
+    console.error(err);
+    if (connection) await connection.rollback();
     throw err;
   } finally {
-    conn.release();
+    if (connection) connection.release();
   }
 };
 
