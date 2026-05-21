@@ -18,7 +18,7 @@ const insertAnemiaPerforma = async (db, payload) => {
     DATE_CREATED,
     DATE_UPDATED
   ) VALUES (
-    b'0', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW()
+    b'0', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW()
   )`;
 
   const params = [

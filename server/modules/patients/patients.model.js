@@ -260,8 +260,9 @@ const updatePatient = async (db, id, payload) => {
       DATA_SOURCE = ?,
       CREATED_BY_LATITUDE = ?,
       CREATED_BY_LONGITUDE = ?
-    WHERE PATIENT_ID = ? AND IS_DELETED = b'0'
+    WHERE PATIENT_ID = ? AND IS_DELETED = 0
   `;
+
 
   const params = [
     UPDATED_BY || null,

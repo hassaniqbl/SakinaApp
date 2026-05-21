@@ -1,0 +1,5 @@
+-- Find existing non-deleted users that can be used as ADDED_BY/UPDATED_BY
+SELECT USER_ID, EMAIL_ADDRESS, FIRST_NAME, LAST_NAME, IS_DELETED
+FROM ADM_USER
+WHERE IS_DELETED = 0;
+
