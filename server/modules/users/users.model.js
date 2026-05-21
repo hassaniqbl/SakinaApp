@@ -84,28 +84,27 @@ const getUserById = async (db, id) => {
 };
 
 const updateUser = async (db, id, payload) => {
-  const sql = `UPDATE SC_USER SET
-    UPDATED_BY = ?,
-    EMAIL = ?,
-    USER_ROLE = ?,
-    LOCATION_ID = ?,
-    FIRSTNAME = ?,
-    LASTNAME = ?,
-    CONTACT = ?,
-    ADDRESS = ?,
-    PROFILE_PICTURE_URL = ?
-  WHERE USER_ID = ? AND IS_DELETED = b'0'`;
+  // DB columns in server/db_setup.sql: EMAIL_ADDRESS, FIRST_NAME, LAST_NAME
+  // Previously this used USER_NAME/USER_EMAIL which do not exist.
+  const sql = `UPDATE SC_USER
+SET
+  FIRSTNAME = ?,
+  LASTNAME = ?,
+  EMAIL = ?,
+  UPDATED_BY = ?,
+  DATE_UPDATED = NOW()
+WHERE USER_ID = ?
+  AND IS_DELETED = 0;`;
+
+  const firstName = payload.FIRSTNAME ?? payload.FIRST_NAME ?? null;
+  const lastName = payload.LASTNAME ?? payload.LAST_NAME ?? null;
+  const email = payload.EMAIL ?? payload.EMAIL_ADDRESS ?? payload.USER_EMAIL ?? null;
 
   const params = [
-    payload.UPDATED_BY || null,
-    payload.EMAIL,
-    payload.USER_ROLE || null,
-    payload.LOCATION_ID || null,
-    payload.FIRSTNAME || null,
-    payload.LASTNAME || null,
-    payload.CONTACT || null,
-    payload.ADDRESS || null,
-    payload.PROFILE_PICTURE_URL || null,
+    firstName,
+    lastName,
+    email,
+    payload.UPDATED_BY ?? null,
     id,
   ];
 

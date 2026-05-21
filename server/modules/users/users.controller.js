@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const { HttpError } = require("../../utils/httpError");
 const { successResponse, errorResponse } = require("../../utils/apiResponse");
+
 const {
   insertUser,
   getAllUsers,
@@ -130,97 +131,45 @@ const getUserByIdCtrl = asyncHandler(async (req, res) => {
 });
 
 const updateUserCtrl = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  const db = req.app.locals.db;
+  try {
+    const { id } = req.params;
+    const db = req.app.locals.db;
 
-  const {
-    EMAIL,
-    USER_ROLE,
-    LOCATION_ID,
-    FIRSTNAME,
-    LASTNAME,
-    CONTACT,
-    ADDRESS,
-    PROFILE_PICTURE_URL,
-  } = req.body || {};
+    const {
+      FIRSTNAME,
+      LASTNAME,
+      EMAIL,
+      // optional alternate names clients might send
+      EMAIL_ADDRESS,
+      USER_EMAIL,
+    } = req.body || {};
 
-  // Validate required fields
-  if (!EMAIL) {
-    throw new HttpError(400, "EMAIL is required");
-  }
+    if (!id) throw new HttpError(400, "User id is required");
 
-  // Normalize LOCATION_ID
-  let normalizedLocationId = null;
+    const finalEmail = EMAIL ?? EMAIL_ADDRESS ?? USER_EMAIL;
+    if (!finalEmail) throw new HttpError(400, "EMAIL is required");
 
-  if (
-    LOCATION_ID !== undefined &&
-    LOCATION_ID !== null &&
-    LOCATION_ID !== ""
-  ) {
-    const parsedLocationId = Number(LOCATION_ID);
+    const payload = {
+      FIRSTNAME: FIRSTNAME ?? null,
+      LASTNAME: LASTNAME ?? null,
+      EMAIL: String(finalEmail).trim(),
+      UPDATED_BY: req.user?.user_id ?? null,
+    };
 
-    if (!Number.isFinite(parsedLocationId)) {
-      throw new HttpError(400, "Invalid LOCATION_ID");
-    }
+    const existing = await getUserById(db, id);
+    if (!existing) throw new HttpError(404, "User not found");
 
-    // Validate LOCATION_ID exists
-    const locationRows = await new Promise((resolve, reject) => {
-      db.query(
-        `
-        SELECT LOCATION_ID
-        FROM adm_location
-        WHERE LOCATION_ID = ?
-        LIMIT 1
-        `,
-        [parsedLocationId],
-        (err, rows) => {
-          if (err) {
-            return reject(err);
-          }
+    const result = await updateUser(db, id, payload);
+    if (!result.affectedRows) throw new HttpError(404, "User not found");
 
-          resolve(rows);
-        }
-      );
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: {},
     });
-
-    if (!locationRows.length) {
-      throw new HttpError(400, "LOCATION_ID does not exist");
-    }
-
-    normalizedLocationId = parsedLocationId;
+  } catch (err) {
+    throw err;
   }
-
-  // Prepare payload
-  const payload = {
-    UPDATED_BY: req.user?.user_id ?? null,
-    EMAIL: String(EMAIL).trim(),
-    USER_ROLE: USER_ROLE ? String(USER_ROLE).trim() : null,
-    LOCATION_ID: normalizedLocationId,
-    FIRSTNAME: FIRSTNAME ? String(FIRSTNAME).trim() : null,
-    LASTNAME: LASTNAME ? String(LASTNAME).trim() : null,
-    CONTACT: CONTACT ? String(CONTACT).trim() : null,
-    ADDRESS: ADDRESS ? String(ADDRESS).trim() : null,
-    PROFILE_PICTURE_URL: PROFILE_PICTURE_URL
-      ? String(PROFILE_PICTURE_URL).trim()
-      : null,
-  };
-
-  // Update user
-  const result = await updateUser(db, id, payload);
-
-  if (!result.affectedRows) {
-    throw new HttpError(404, "User not found");
-  }
-
-  return res.status(200).json(
-    successResponse(
-      "User updated successfully",
-      {
-        affectedRows: result.affectedRows,
-      },
-      {}
-    )
-  );
 });
 
 const deleteUserCtrl = asyncHandler(async (req, res) => {
