@@ -77,10 +77,17 @@ const softDeleteAdmCodeItemTx = async (db, codeItemId, updatedBy) => {
 };
 
 
+const getAllAdmCodeItemsSimple = async (db) => {
+  const { getAllAdmCodeItemsSimple } = require("./adm-code-item.model");
+  return getAllAdmCodeItemsSimple(db);
+};
+
 module.exports = {
   createAdmCodeItemTx,
   updateAdmCodeItemTx,
   softDeleteAdmCodeItemTx,
   ensureCodeIdExists,
+  getAllAdmCodeItemsSimple,
 };
+
 

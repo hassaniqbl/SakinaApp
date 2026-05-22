@@ -1,3 +1,9 @@
+const getAllAdmCodeItemsSimple = async (db) => {
+  const sql = `SELECT * FROM ADM_CODE_ITEM`;
+  const [rows] = await db.promise().query(sql);
+  return rows;
+};
+
 const getAllAdmCodeItems = async (
   db,
   { page, limit, offset },
@@ -5,6 +11,7 @@ const getAllAdmCodeItems = async (
   { searchClause, searchParams },
   { sortBy, sortOrder }
 ) => {
+
   const where = ["ci.IS_DELETED = b'0'"]
     .concat(codeIdFilterClause ? [codeIdFilterClause] : [])
     .concat(searchClause ? [searchClause] : [])
@@ -155,6 +162,7 @@ const getDropdownItemsByCodeId = async (db, codeId) => {
 };
 
 module.exports = {
+  getAllAdmCodeItemsSimple,
   getAllAdmCodeItems,
   getAdmCodeItemById,
   insertAdmCodeItem,
@@ -164,4 +172,5 @@ module.exports = {
   getDropdownItemsByCodeId,
   softDeleteAdmCodeItemsByCodeId,
 };
+
 

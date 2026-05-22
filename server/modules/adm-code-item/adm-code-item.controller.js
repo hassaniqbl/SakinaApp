@@ -1,19 +1,13 @@
 const asyncHandler = require("../../config/asyncHandler");
 const { HttpError } = require("../../utils/httpError");
 const { successResponse } = require("../../utils/apiResponse");
-const { getPagination, normalizeSort, buildSearchClause } = require("../../utils/queryBuilder");
 
-const {
-  getAllAdmCodeItems,
-  getAdmCodeItemById,
-  insertAdmCodeItem,
-  updateAdmCodeItem,
-  softDeleteAdmCodeItem,
-  codeExists,
-  getCodeItemsByCodeId,
-  getDropdownItemsByCodeId,
-  softDeleteAdmCodeItemsByCodeId,
-} = require("./adm-code-item.model");
+
+const { getAdmCodeItemById, getDropdownItemsByCodeId } = require("./adm-code-item.model");
+
+
+
+
 
 const {
   createAdmCodeItemTx,
@@ -22,48 +16,19 @@ const {
   ensureCodeIdExists,
 } = require("./adm-code-item.service");
 
-const ALLOWED_SORT = new Set(["DISPLAY_ORDER", "ITEM_NAME", "CODE_ITEM_ID", "DATE_CREATED", "DATE_UPDATED"]);
-
 const getItemsCtrl = asyncHandler(async (req, res) => {
-  const db = req.app.locals.db;
-  const { page, limit, offset } = getPagination(req.query);
+  const rows = await req.app.locals.db.promise().query("SELECT * FROM ADM_CODE_ITEM").then(([r]) => r);
 
-  const { sortBy, sortOrder } = normalizeSort(req.query, Array.from(ALLOWED_SORT), "DISPLAY_ORDER");
-
-  const codeId = req.query.code_id !== undefined ? Number(req.query.code_id) : null;
-  if (req.query.code_id !== undefined && (!Number.isFinite(codeId) || codeId <= 0)) {
-    throw new HttpError(400, "code_id must be a valid integer");
-  }
-
-  const searchClauseObj = buildSearchClause({
-    searchFields: ["ci.ITEM_NAME"],
-    searchQuery: req.query.search,
+  return res.status(200).json({
+    success: true,
+    message: "ADM_CODE_ITEM list fetched successfully",
+    data: rows,
   });
-
-  const codeIdFilterClause = codeId ? "ci.CODE_ID = ?" : "";
-  const codeIdFilterParams = codeId ? [codeId] : [];
-
-  const { rows, total } = await getAllAdmCodeItems(
-    db,
-    { page, limit, offset },
-    {
-      codeIdFilterClause,
-      codeIdFilterParams,
-      searchClause: searchClauseObj.clause ? `(${searchClauseObj.clause})` : "",
-      searchParams: searchClauseObj.params,
-    },
-    { sortBy, sortOrder }
-  );
-
-  return res.status(200).json(
-    successResponse("Data fetched successfully", rows, {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit) || 0,
-    })
-  );
 });
+
+
+
+
 
 const getByIdCtrl = asyncHandler(async (req, res) => {
   const row = await getAdmCodeItemById(req.app.locals.db, req.params.id);

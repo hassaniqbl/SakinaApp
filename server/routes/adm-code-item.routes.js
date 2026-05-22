@@ -17,9 +17,9 @@ const {
   validateCreateAdmCodeItem,
   validateUpdateAdmCodeItem,
   validateIdParam,
-  validateListQuery,
   validateDropdownCodeId,
 } = require("../modules/adm-code-item/adm-code-item.validation");
+
 
 const router = express.Router();
 
@@ -77,7 +77,7 @@ router.post("/adm-code-item", authMiddleware, validateCreateAdmCodeItem, validat
  *       200:
  *         description: List fetched
  */
-router.get("/adm-code-item", authMiddleware, validateListQuery, validateRequest, getItemsCtrl);
+router.get("/adm-code-item", authMiddleware, validateRequest, getItemsCtrl);
 
 /**
  * @swagger
