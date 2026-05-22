@@ -1,6 +1,12 @@
 const express = require("express");
 const { authMiddleware } = require("../middleware/auth.middleware");
-const { createAnemiaPerforma, getAnemiaPerformas, getAnemiaPerformaByIdCtrl, updateAnemiaPerformaCtrl, deleteAnemiaPerformaCtrl } = require("../modules/anemia-performa/anemia-performa.controller");
+const {
+  createAnemiaPerforma,
+  getAnemiaPerformas,
+  getAnemiaPerformaByIdCtrl,
+  updateAnemiaPerformaCtrl,
+  deleteAnemiaPerformaCtrl,
+} = require("../modules/anemia-performa/anemia-performa.controller");
 
 const router = express.Router();
 
@@ -18,20 +24,21 @@ const router = express.Router();
  *     summary: Create anemia performa
  *     tags: [Anemia Performa]
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             example:
- *               ANEMIA_CHECKUP_ID: 1
- *               INJECTION_BRAND: 2
- *               INJECTION_DOSE: 100
- *               IV_IRON_QUANTITY: 300
- *               INJECTION_DATE: "2024-01-15"
- *               REACTION_AFTER_INJECTION: "No reaction"
- *               DATA_SOURCE: "APP"
- *               CREATED_BY_LATITUDE: 31.5204
- *               CREATED_BY_LONGITUDE: 74.3587
+ *           example:
+ *             ANEMIA_CHECKUP_ID: 1
+ *             INJECTION_BRAND: 2
+ *             INJECTION_DOSE: 100
+ *             IV_IRON_QUANTITY: 300
+ *             INJECTION_DATE: "2024-01-15"
+ *             REACTION_AFTER_INJECTION: "No reaction"
+ *             DATA_SOURCE: "APP"
+ *             CREATED_BY_LATITUDE: 31.5204
+ *             CREATED_BY_LONGITUDE: 74.3587
  *     responses:
  *       201:
  *         description: Created
@@ -81,10 +88,55 @@ router.get("/anemia-performa/:id", authMiddleware, getAnemiaPerformaByIdCtrl);
  *         schema:
  *           type: string
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - ANEMIA_CHECKUP_ID
+ *             properties:
+ *               ANEMIA_CHECKUP_ID:
+ *                 type: integer
+ *                 example: 1
+ *               INJECTION_BRAND:
+ *                 type: integer
+ *                 example: 2
+ *               INJECTION_DOSE:
+ *                 type: number
+ *                 example: 100
+ *               IV_IRON_QUANTITY:
+ *                 type: number
+ *                 example: 300
+ *               INJECTION_DATE:
+ *                 type: string
+ *                 format: date
+ *                 example: "2024-01-15"
+ *               REACTION_AFTER_INJECTION:
+ *                 type: string
+ *                 example: "No reaction"
+ *               DATA_SOURCE:
+ *                 type: string
+ *                 example: "APP"
+ *               CREATED_BY_LATITUDE:
+ *                 type: number
+ *                 format: double
+ *                 example: 31.5204
+ *               CREATED_BY_LONGITUDE:
+ *                 type: number
+ *                 format: double
+ *                 example: 74.3587
+ *             additionalProperties: false
+ *           example:
+ *             ANEMIA_CHECKUP_ID: 1
+ *             INJECTION_BRAND: 2
+ *             INJECTION_DOSE: 100
+ *             IV_IRON_QUANTITY: 300
+ *             INJECTION_DATE: "2024-01-15"
+ *             REACTION_AFTER_INJECTION: "No reaction"
+ *             DATA_SOURCE: "APP"
+ *             CREATED_BY_LATITUDE: 31.5204
+ *             CREATED_BY_LONGITUDE: 74.3587
  *     responses:
  *       200:
  *         description: Updated
