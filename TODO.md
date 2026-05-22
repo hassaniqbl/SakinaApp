@@ -1,8 +1,6 @@
-# TODO - SakinaApp
-
-- [x] Locate relevant CORS usage on backend and frontend.
-- [x] Update `server/app.js` to use explicit CORS options (fix preflight / OPTIONS handling).
-- [x] Update `server/index.js` CORS middleware to match the same explicit behavior.
-- [x] Update `client/src/App.jsx` to read API base from `VITE_API_BASE` (falls back to localhost).
-- [ ] Start backend + frontend and verify browser CORS error is resolved.
-
+- [x] Fix GET /adm-code-item to return all ADM_CODE_ITEM records (simple SELECT *)
+- [ ] Refactor existing server/modules/users/* into ADM_USER naming + endpoints under /adm-user
+- [ ] Update SQL/model/controller/services to match ADM_USER schema exactly
+- [ ] Implement required validations and remove pagination/search from GET /adm-user
+- [ ] Update Swagger JSDoc blocks in routes to match schema
+- [ ] Verify route registration produces /adm-user CRUD without conflicts

@@ -1,6 +1,5 @@
 const asyncHandler = require("../../config/asyncHandler");
 const bcrypt = require("bcrypt");
-const path = require("path");
 const { HttpError } = require("../../utils/httpError");
 const { successResponse, errorResponse } = require("../../utils/apiResponse");
 
@@ -16,12 +15,14 @@ const { getPagination, normalizeSort, buildSearchClause, buildFilterClause } = r
 
 const ALLOWED_SORT = [
   "USER_ID",
-  "EMAIL",
-  "USER_ROLE",
-  "FIRSTNAME",
-  "LASTNAME",
+  "EMAIL_ADDRESS",
+  "ROLE_ID",
+  "LOCATION_ID",
+  "FIRST_NAME",
+  "LAST_NAME",
   "DATE_CREATED",
   "DATE_UPDATED",
+  "IS_ACTIVE",
 ];
 
 const getFilters = (query) => {
@@ -29,63 +30,51 @@ const getFilters = (query) => {
     filters: query,
     allowedFilters: {
       location_id: { column: "u.LOCATION_ID", type: "number" },
-      user_role: { column: "u.USER_ROLE", type: "string" },
+      role_id: { column: "u.ROLE_ID", type: "number" },
     },
   };
 };
 
-const searchFields = ["u.EMAIL", "u.FIRSTNAME", "u.LASTNAME", "u.CONTACT", "u.ADDRESS"];
+const searchFields = ["u.EMAIL_ADDRESS", "u.FIRST_NAME", "u.LAST_NAME", "u.PHONE_NUMBER", "u.ADDRESS_LINE1", "u.ADDRESS_LINE2"];
 
 const createUser = asyncHandler(async (req, res) => {
-  const {
-    EMAIL,
-    PASS,
-    USER_ROLE,
-    LOCATION_ID,
-    FIRSTNAME,
-    LASTNAME,
-    CONTACT,
-    ADDRESS,
-    PROFILE_PICTURE_URL,
-    added_by,
-  } = req.body || {};
+  const body = req.body || {};
 
-  if (!EMAIL) throw new HttpError(400, "EMAIL is required");
+  const EMAIL_ADDRESS = body.EMAIL_ADDRESS ?? body.EMAIL;
+  const PASS = body.PASS;
+
+  if (!EMAIL_ADDRESS) throw new HttpError(400, "EMAIL_ADDRESS is required");
   if (!PASS) throw new HttpError(400, "PASS is required");
 
   const hashed = await bcrypt.hash(String(PASS), 10);
 
-  // Normalize LOCATION_ID to avoid FK failures:
-  // - treat empty/undefined/null as NULL
-  // - coerce numeric strings to number
-  // - if invalid, set NULL (FK allows NULL)
-  const normalizedLocationId = (() => {
-    if (LOCATION_ID === undefined || LOCATION_ID === null || LOCATION_ID === "") return null;
-    const n = Number(LOCATION_ID);
+  const normalizeId = (v) => {
+    if (v === undefined || v === null || v === "") return null;
+    const n = Number(v);
     return Number.isFinite(n) ? n : null;
-  })();
-
-  const payload = {
-    EMAIL: String(EMAIL).trim(),
-    PASS: hashed,
-    USER_ROLE: USER_ROLE || null,
-    LOCATION_ID: normalizedLocationId,
-    FIRSTNAME: FIRSTNAME || null,
-    LASTNAME: LASTNAME || null,
-    CONTACT: CONTACT || null,
-    ADDRESS: ADDRESS || null,
-    PROFILE_PICTURE_URL: PROFILE_PICTURE_URL || null,
-    ADDED_BY: added_by ?? req.user?.user_id ?? null,
-    UPDATED_BY: req.user?.user_id ?? null,
   };
 
+  const payload = {
+    ACCOUNT_GUID: body.ACCOUNT_GUID ?? null,
+    EMAIL_ADDRESS: String(EMAIL_ADDRESS).trim(),
+    PASS: hashed,
+    ROLE_ID: normalizeId(body.ROLE_ID),
+    LOCATION_ID: normalizeId(body.LOCATION_ID),
+    FIRST_NAME: body.FIRST_NAME ?? body.FIRSTNAME ?? null,
+    LAST_NAME: body.LAST_NAME ?? body.LASTNAME ?? null,
+    PHONE_NUMBER: body.PHONE_NUMBER ?? body.CONTACT ?? null,
+    ADDRESS_LINE1: body.ADDRESS_LINE1 ?? body.ADDRESS ?? null,
+    ADDRESS_LINE2: body.ADDRESS_LINE2 ?? null,
+    PROFILE_PICTURE_URL: body.PROFILE_PICTURE_URL ?? null,
+    IS_ACTIVE: body.IS_ACTIVE === undefined ? 1 : body.IS_ACTIVE ? 1 : 0,
+    ADDED_BY: body.ADDED_BY ?? req.user?.user_id ?? null,
+    UPDATED_BY: req.user?.user_id ?? null,
+  };
 
   const db = req.app.locals.db;
   const result = await insertUser(db, payload);
 
-  return res
-    .status(201)
-    .json(successResponse("User created successfully", { affectedRows: result.affectedRows }, {}));
+  return res.status(201).json(successResponse("User created successfully", { affectedRows: result.affectedRows }, {}));
 });
 
 const getUsers = asyncHandler(async (req, res) => {
@@ -131,45 +120,44 @@ const getUserByIdCtrl = asyncHandler(async (req, res) => {
 });
 
 const updateUserCtrl = asyncHandler(async (req, res) => {
-  try {
-    const { id } = req.params;
-    const db = req.app.locals.db;
+  const { id } = req.params;
+  const db = req.app.locals.db;
 
-    const {
-      FIRSTNAME,
-      LASTNAME,
-      EMAIL,
-      // optional alternate names clients might send
-      EMAIL_ADDRESS,
-      USER_EMAIL,
-    } = req.body || {};
+  if (!id) throw new HttpError(400, "User id is required");
 
-    if (!id) throw new HttpError(400, "User id is required");
+  const body = req.body || {};
 
-    const finalEmail = EMAIL ?? EMAIL_ADDRESS ?? USER_EMAIL;
-    if (!finalEmail) throw new HttpError(400, "EMAIL is required");
+  const existing = await getUserById(db, id);
+  if (!existing) throw new HttpError(404, "User not found");
 
-    const payload = {
-      FIRSTNAME: FIRSTNAME ?? null,
-      LASTNAME: LASTNAME ?? null,
-      EMAIL: String(finalEmail).trim(),
-      UPDATED_BY: req.user?.user_id ?? null,
-    };
+  const normalizeId = (v) => {
+    if (v === undefined || v === null || v === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
 
-    const existing = await getUserById(db, id);
-    if (!existing) throw new HttpError(404, "User not found");
+  // If PASS provided, hash it; otherwise keep existing PASS
+  const pass = body.PASS ? await bcrypt.hash(String(body.PASS), 10) : existing.PASS;
 
-    const result = await updateUser(db, id, payload);
-    if (!result.affectedRows) throw new HttpError(404, "User not found");
+  const payload = {
+    EMAIL_ADDRESS: (body.EMAIL_ADDRESS ?? body.EMAIL ?? existing.EMAIL_ADDRESS) ? String(body.EMAIL_ADDRESS ?? body.EMAIL ?? existing.EMAIL_ADDRESS).trim() : null,
+    PASS: pass,
+    ROLE_ID: normalizeId(body.ROLE_ID) ?? existing.ROLE_ID ?? null,
+    LOCATION_ID: normalizeId(body.LOCATION_ID) ?? existing.LOCATION_ID ?? null,
+    FIRST_NAME: body.FIRST_NAME ?? body.FIRSTNAME ?? existing.FIRST_NAME ?? null,
+    LAST_NAME: body.LAST_NAME ?? body.LASTNAME ?? existing.LAST_NAME ?? null,
+    PHONE_NUMBER: body.PHONE_NUMBER ?? body.CONTACT ?? existing.PHONE_NUMBER ?? null,
+    ADDRESS_LINE1: body.ADDRESS_LINE1 ?? body.ADDRESS ?? existing.ADDRESS_LINE1 ?? null,
+    ADDRESS_LINE2: body.ADDRESS_LINE2 ?? existing.ADDRESS_LINE2 ?? null,
+    PROFILE_PICTURE_URL: body.PROFILE_PICTURE_URL ?? existing.PROFILE_PICTURE_URL ?? null,
+    IS_ACTIVE: body.IS_ACTIVE === undefined ? existing.IS_ACTIVE : body.IS_ACTIVE ? 1 : 0,
+    UPDATED_BY: req.user?.user_id ?? null,
+  };
 
-    return res.status(200).json({
-      success: true,
-      message: "User updated successfully",
-      data: {},
-    });
-  } catch (err) {
-    throw err;
-  }
+  const result = await updateUser(db, id, payload);
+  if (!result.affectedRows) throw new HttpError(404, "User not found");
+
+  return res.status(200).json({ success: true, message: "User updated successfully", data: {} });
 });
 
 const deleteUserCtrl = asyncHandler(async (req, res) => {

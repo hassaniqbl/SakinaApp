@@ -15,13 +15,15 @@ async function startServer() {
     console.log("MySQL Connected");
   } catch (err) {
     console.error("MySQL connection error:", err);
+    // Fail fast so API doesn't start with an invalid DB configuration.
+    process.exit(1);
   }
-
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 }
+
 
 startServer().catch((err) => {
   console.error("Failed to start server:", err);

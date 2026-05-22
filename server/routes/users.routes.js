@@ -7,6 +7,7 @@ const {
   deleteUserCtrl,
 } = require("../modules/users/users.controller");
 
+const { validateCreateUser, validateUpdateUser } = require("../modules/users/users.validation");
 const { authMiddleware } = require("../middleware/auth.middleware");
 
 const router = express.Router();
@@ -18,76 +19,83 @@ const router = express.Router();
  *     CreateUserRequest:
  *       type: object
  *       required:
- *         - EMAIL
+ *         - EMAIL_ADDRESS
  *         - PASS
  *       properties:
- *         EMAIL:
+ *         ACCOUNT_GUID:
+ *           type: string
+ *           example: abc-123-guid
+ *         EMAIL_ADDRESS:
  *           type: string
  *           example: admin@example.com
  *         PASS:
  *           type: string
  *           example: Admin@123
- *         USER_ROLE:
- *           type: string
- *           example: ADMIN
+ *         ROLE_ID:
+ *           type: integer
+ *           example: 1
  *         LOCATION_ID:
  *           type: integer
  *           example: 1
- *         FIRSTNAME:
+ *         FIRST_NAME:
  *           type: string
  *           example: Hassan
- *         LASTNAME:
+ *         LAST_NAME:
  *           type: string
  *           example: Iqbal
- *         CONTACT:
+ *         PHONE_NUMBER:
  *           type: string
  *           example: +923001234567
- *         ADDRESS:
+ *         ADDRESS_LINE1:
  *           type: string
  *           example: Rawalpindi Pakistan
+ *         ADDRESS_LINE2:
+ *           type: string
+ *           example: Sector 1
  *         PROFILE_PICTURE_URL:
  *           type: string
  *           example: https://example.com/profile.jpg
- *         added_by:
+ *         IS_ACTIVE:
+ *           type: integer
+ *           example: 1
+ *         ADDED_BY:
  *           type: integer
  *           example: 1
  *
  *     UpdateUserRequest:
  *       type: object
- *       required:
- *         - EMAIL
  *       properties:
- *         EMAIL:
+ *         ACCOUNT_GUID:
  *           type: string
- *           example: updated@example.com
- *         USER_ROLE:
+ *         EMAIL_ADDRESS:
  *           type: string
- *           example: STAFF
+ *         PASS:
+ *           type: string
+ *         ROLE_ID:
+ *           type: integer
  *         LOCATION_ID:
  *           type: integer
- *           example: 2
- *         FIRSTNAME:
+ *         FIRST_NAME:
  *           type: string
- *           example: Ali
- *         LASTNAME:
+ *         LAST_NAME:
  *           type: string
- *           example: Raza
- *         CONTACT:
+ *         PHONE_NUMBER:
  *           type: string
- *           example: +923009998887
- *         ADDRESS:
+ *         ADDRESS_LINE1:
  *           type: string
- *           example: Islamabad Pakistan
+ *         ADDRESS_LINE2:
+ *           type: string
  *         PROFILE_PICTURE_URL:
  *           type: string
- *           example: https://example.com/new-profile.jpg
+ *         IS_ACTIVE:
+ *           type: integer
  */
 
 /**
  * @swagger
  * tags:
  *   name: Users
- *   description: CRUD APIs for SC_USER
+ *   description: CRUD APIs for ADM_USER
  */
 
 /**
@@ -117,7 +125,7 @@ const router = express.Router();
  *       201:
  *         description: User created successfully
  */
-router.post("/users", authMiddleware, createUser);
+router.post("/users", authMiddleware, validateCreateUser, createUser);
 
 /**
  * @swagger
@@ -184,7 +192,7 @@ router.get("/users/:id", authMiddleware, getUserByIdCtrl);
  *       200:
  *         description: User updated successfully
  */
-router.put("/users/:id", authMiddleware, updateUserCtrl);
+router.put("/users/:id", authMiddleware, validateUpdateUser, updateUserCtrl);
 
 /**
  * @swagger

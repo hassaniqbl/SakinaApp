@@ -1,32 +1,67 @@
 const { HttpError } = require("../../utils/httpError");
 
 const buildUserSelect = (extra = "") => {
-  return `SELECT USER_ID, IS_DELETED, ADDED_BY, UPDATED_BY, DATE_CREATED, DATE_UPDATED, 
-    EMAIL, USER_ROLE, LOCATION_ID, FIRSTNAME, LASTNAME, CONTACT, ADDRESS, PROFILE_PICTURE_URL ${extra}`;
+  return `SELECT
+    u.USER_ID,
+    u.ACCOUNT_GUID,
+    u.EMAIL_ADDRESS,
+    u.ROLE_ID,
+    r.ITEM_NAME AS ROLE_NAME,
+    u.LOCATION_ID,
+    l.ITEM_NAME AS LOCATION_NAME,
+    u.FIRST_NAME,
+    u.LAST_NAME,
+    u.PHONE_NUMBER,
+    u.ADDRESS_LINE1,
+    u.ADDRESS_LINE2,
+    u.PROFILE_PICTURE_URL,
+    u.IS_ACTIVE,
+    u.IS_DELETED,
+    u.ADDED_BY,
+    u.UPDATED_BY,
+    u.DATE_CREATED,
+    u.DATE_UPDATED
+  ${extra}`;
 };
 
 const insertUser = async (db, payload) => {
-  const sql = `INSERT INTO SC_USER (
-    IS_DELETED, ADDED_BY, UPDATED_BY,
-    EMAIL, PASS, USER_ROLE, LOCATION_ID,
-    FIRSTNAME, LASTNAME, CONTACT, ADDRESS, PROFILE_PICTURE_URL,
-    DATE_CREATED, DATE_UPDATED
-  ) VALUES (
-    b'0', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , NOW(), NOW()
-  )`;
+  const sql = `
+    INSERT INTO ADM_USER (
+      ACCOUNT_GUID,
+      EMAIL_ADDRESS,
+      PASS,
+      ROLE_ID,
+      LOCATION_ID,
+      FIRST_NAME,
+      LAST_NAME,
+      PHONE_NUMBER,
+      ADDRESS_LINE1,
+      ADDRESS_LINE2,
+      PROFILE_PICTURE_URL,
+      IS_ACTIVE,
+      IS_DELETED,
+      ADDED_BY,
+      UPDATED_BY,
+      DATE_CREATED,
+      DATE_UPDATED
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, b'0', ?, ?, NOW(), NOW())
+  `;
 
   const params = [
-    payload.ADDED_BY || null,
-    payload.UPDATED_BY || null,
-    payload.EMAIL,
+    payload.ACCOUNT_GUID ?? null,
+    payload.EMAIL_ADDRESS,
     payload.PASS,
-    payload.USER_ROLE || null,
-    payload.LOCATION_ID || null,
-    payload.FIRSTNAME || null,
-    payload.LASTNAME || null,
-    payload.CONTACT || null,
-    payload.ADDRESS || null,
-    payload.PROFILE_PICTURE_URL || null,
+    payload.ROLE_ID ?? null,
+    payload.LOCATION_ID ?? null,
+    payload.FIRST_NAME ?? null,
+    payload.LAST_NAME ?? null,
+    payload.PHONE_NUMBER ?? null,
+    payload.ADDRESS_LINE1 ?? null,
+    payload.ADDRESS_LINE2 ?? null,
+    payload.PROFILE_PICTURE_URL ?? null,
+    payload.IS_ACTIVE === undefined || payload.IS_ACTIVE === null ? 1 : payload.IS_ACTIVE ? 1 : 0,
+    payload.ADDED_BY ?? null,
+    payload.UPDATED_BY ?? null,
   ];
 
   const [result] = await db.promise().execute(sql, params);
@@ -45,18 +80,33 @@ const getAllUsers = async (
 
   const where = whereParts.filter(Boolean).join(" AND ");
 
-  // IMPORTANT: `sortBy` is validated in controller (ALLOWED_SORT). Still, keep SQL safe.
-  // Avoid accidental injection of invalid/undefined columns.
-  // `sortBy` should already be validated, but guard against missing/invalid values.
   const orderByColumn = sortBy && sortBy !== "undefined" ? String(sortBy) : "DATE_CREATED";
   const orderByDir = sortOrder === "ASC" ? "ASC" : "DESC";
 
-
   const finalSelect = `
     SELECT
-      u.USER_ID, u.IS_DELETED, u.ADDED_BY, u.UPDATED_BY, u.DATE_CREATED, u.DATE_UPDATED,
-      u.EMAIL, u.USER_ROLE, u.LOCATION_ID, u.FIRSTNAME, u.LASTNAME, u.CONTACT, u.ADDRESS, u.PROFILE_PICTURE_URL
-    FROM SC_USER u
+      u.USER_ID,
+      u.ACCOUNT_GUID,
+      u.EMAIL_ADDRESS,
+      u.ROLE_ID,
+      r.ITEM_NAME AS ROLE_NAME,
+      u.LOCATION_ID,
+      l.ITEM_NAME AS LOCATION_NAME,
+      u.FIRST_NAME,
+      u.LAST_NAME,
+      u.PHONE_NUMBER,
+      u.ADDRESS_LINE1,
+      u.ADDRESS_LINE2,
+      u.PROFILE_PICTURE_URL,
+      u.IS_ACTIVE,
+      u.IS_DELETED,
+      u.ADDED_BY,
+      u.UPDATED_BY,
+      u.DATE_CREATED,
+      u.DATE_UPDATED
+    FROM ADM_USER u
+    LEFT JOIN ADM_CODE_ITEM r ON r.CODE_ITEM_ID = u.ROLE_ID AND r.IS_DELETED = b'0'
+    LEFT JOIN ADM_CODE_ITEM l ON l.CODE_ITEM_ID = u.LOCATION_ID AND l.IS_DELETED = b'0'
     WHERE ${where}
     ORDER BY u.${orderByColumn} ${orderByDir}
     LIMIT ? OFFSET ?
@@ -69,41 +119,56 @@ const getAllUsers = async (
 
   const [countRows] = await db
     .promise()
-    .query(`SELECT COUNT(*) as total FROM SC_USER u WHERE ${where}`, commonParams);
+    .query(`SELECT COUNT(*) as total FROM ADM_USER u WHERE ${where}`, commonParams);
 
   const total = countRows?.[0]?.total || 0;
   return { rows, total };
 };
 
 const getUserById = async (db, id) => {
+  const selectFrom = `
+    FROM ADM_USER u
+    LEFT JOIN ADM_CODE_ITEM r ON r.CODE_ITEM_ID = u.ROLE_ID AND r.IS_DELETED = b'0'
+    LEFT JOIN ADM_CODE_ITEM l ON l.CODE_ITEM_ID = u.LOCATION_ID AND l.IS_DELETED = b'0'
+  `;
   const [rows] = await db
     .promise()
-    .query(`${buildUserSelect("FROM SC_USER")}
-      WHERE USER_ID = ? AND IS_DELETED = b'0'`, [id]);
+    .query(`${buildUserSelect(selectFrom)} WHERE u.USER_ID = ? AND u.IS_DELETED = b'0'`, [id]);
   return rows[0] || null;
 };
 
 const updateUser = async (db, id, payload) => {
-  // DB columns in server/db_setup.sql: EMAIL_ADDRESS, FIRST_NAME, LAST_NAME
-  // Previously this used USER_NAME/USER_EMAIL which do not exist.
-  const sql = `UPDATE SC_USER
-SET
-  FIRSTNAME = ?,
-  LASTNAME = ?,
-  EMAIL = ?,
-  UPDATED_BY = ?,
-  DATE_UPDATED = NOW()
-WHERE USER_ID = ?
-  AND IS_DELETED = 0;`;
-
-  const firstName = payload.FIRSTNAME ?? payload.FIRST_NAME ?? null;
-  const lastName = payload.LASTNAME ?? payload.LAST_NAME ?? null;
-  const email = payload.EMAIL ?? payload.EMAIL_ADDRESS ?? payload.USER_EMAIL ?? null;
+  const sql = `
+    UPDATE ADM_USER
+    SET
+      EMAIL_ADDRESS = ?,
+      PASS = ?,
+      ROLE_ID = ?,
+      LOCATION_ID = ?,
+      FIRST_NAME = ?,
+      LAST_NAME = ?,
+      PHONE_NUMBER = ?,
+      ADDRESS_LINE1 = ?,
+      ADDRESS_LINE2 = ?,
+      PROFILE_PICTURE_URL = ?,
+      IS_ACTIVE = ?,
+      UPDATED_BY = ?,
+      DATE_UPDATED = NOW()
+    WHERE USER_ID = ? AND IS_DELETED = b'0'
+  `;
 
   const params = [
-    firstName,
-    lastName,
-    email,
+    payload.EMAIL_ADDRESS ?? null,
+    payload.PASS ?? null,
+    payload.ROLE_ID ?? null,
+    payload.LOCATION_ID ?? null,
+    payload.FIRST_NAME ?? null,
+    payload.LAST_NAME ?? null,
+    payload.PHONE_NUMBER ?? null,
+    payload.ADDRESS_LINE1 ?? null,
+    payload.ADDRESS_LINE2 ?? null,
+    payload.PROFILE_PICTURE_URL ?? null,
+    payload.IS_ACTIVE === undefined || payload.IS_ACTIVE === null ? 1 : payload.IS_ACTIVE ? 1 : 0,
     payload.UPDATED_BY ?? null,
     id,
   ];
@@ -116,8 +181,8 @@ const softDeleteUser = async (db, id, updatedBy) => {
   const [result] = await db
     .promise()
     .execute(
-      `UPDATE SC_USER SET IS_DELETED = b'1', UPDATED_BY = ? WHERE USER_ID = ? AND IS_DELETED = b'0'`,
-      [updatedBy || null, id]
+      `UPDATE ADM_USER SET IS_DELETED = b'1', UPDATED_BY = ?, DATE_UPDATED = NOW() WHERE USER_ID = ? AND IS_DELETED = b'0'`,
+      [updatedBy ?? null, id]
     );
   return result;
 };
