@@ -57,8 +57,12 @@ const router = express.Router();
  *           example: https://example.com/profile.jpg
  *         IS_ACTIVE:
  *           type: integer
+ *           enum: [0, 1]
  *           example: 1
  *         ADDED_BY:
+ *           type: integer
+ *           example: 1
+ *         UPDATED_BY:
  *           type: integer
  *           example: 1
  *
@@ -111,16 +115,19 @@ const router = express.Router();
  *           schema:
  *             $ref: '#/components/schemas/CreateUserRequest'
  *           example:
- *             EMAIL: admin@example.com
+ *             ACCOUNT_GUID: abc-123-guid
+ *             EMAIL_ADDRESS: admin@example.com
  *             PASS: Admin@123
- *             USER_ROLE: ADMIN
+ *             ROLE_ID: 1
  *             LOCATION_ID: 1
- *             FIRSTNAME: Hassan
- *             LASTNAME: Iqbal
- *             CONTACT: +923001234567
- *             ADDRESS: Rawalpindi Pakistan
+ *             FIRST_NAME: Hassan
+ *             LAST_NAME: Iqbal
+ *             PHONE_NUMBER: +923001234567
+ *             ADDRESS_LINE1: Rawalpindi Pakistan
+ *             ADDRESS_LINE2: Sector 1
  *             PROFILE_PICTURE_URL: https://example.com/profile.jpg
- *             added_by: 1
+ *             IS_ACTIVE: 1
+ *             ADDED_BY: 1
  *     responses:
  *       201:
  *         description: User created successfully

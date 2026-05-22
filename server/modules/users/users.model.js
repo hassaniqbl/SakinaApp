@@ -5,6 +5,7 @@ const buildUserSelect = (extra = "") => {
     u.USER_ID,
     u.ACCOUNT_GUID,
     u.EMAIL_ADDRESS,
+    u.PASS,
     u.ROLE_ID,
     r.ITEM_NAME AS ROLE_NAME,
     u.LOCATION_ID,
