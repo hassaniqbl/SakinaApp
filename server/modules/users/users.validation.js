@@ -2,7 +2,7 @@ const { validateBody } = require("../../middleware/validate");
 
 const createSchema = {
   ACCOUNT_GUID: { type: "string" },
-  EMAIL_ADDRESS: { type: "string", required: true },
+  EMAIL_ADDRESS: { type: "string", required: true, format: "email" },
   PASS: { type: "string", required: true },
   ROLE_ID: { type: "integer" },
   LOCATION_ID: { type: "integer" },
@@ -22,3 +22,4 @@ module.exports = {
   validateCreateUser: validateBody(createSchema),
   validateUpdateUser: validateBody(updateSchema, { skipMissing: true }),
 };
+

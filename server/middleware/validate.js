@@ -20,10 +20,18 @@ function validateBody(schema, { skipMissing = false } = {}) {
         if (typeof val !== "string") errors.push(`${key} must be a string`);
       }
 
+      if (rule.format === "email") {
+        const emailStr = String(val).trim();
+        // Simple email regex suitable for API validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailStr)) errors.push(`${key} must be a valid email address`);
+      }
+
       if (rule.type === "number") {
         const n = Number(val);
         if (!Number.isFinite(n)) errors.push(`${key} must be a number`);
       }
+
 
       if (rule.enum && !rule.enum.includes(val)) {
         errors.push(`${key} must be one of: ${rule.enum.join(", ")}`);
